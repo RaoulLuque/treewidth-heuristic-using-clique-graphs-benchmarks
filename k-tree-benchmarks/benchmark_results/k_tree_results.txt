@@ -1,0 +1,4 @@
+n: 50 | k: 10 | p: 10 
+| MTrNiTLd        | MTrNiTLdBC 2    | MTrNiTLdBC 3    | MTrNiTLdBC 10   | FiWhNiTLd       | FiWhLdTNiBC 2   | FiWhLdTNiBC 3   | FiWhLdTNiBC 10  |
+| 19.2    19.3    | 42.8    9.4     | 47.8    217.4   | 19.4    19.6    | 15.9    962.8   | 45.9    475.2   | 47.4    70126.4 | 16.4    979.3   |
+ 

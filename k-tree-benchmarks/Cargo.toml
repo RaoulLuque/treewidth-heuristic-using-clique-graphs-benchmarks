@@ -1,0 +1,16 @@
+[package]
+name = "k-tree-benchmarks"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+authors = ["Raoul Luque <raoulsluque@gmail.com>"]
+description = "Benchmarks for a heuristic for calculating an upper bound on treewidth of graphs using clique-graphs using partial k trees"
+repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+petgraph = "0.6.4"
+treewidth_heuristic_clique_graph = { git = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph"}
+rand = "0.8.5"
+rustc-hash = { git = "https://github.com/rust-lang/rustc-hash"}
+dimacs-benchmarks = { path = "../dimacs-benchmarks", version = "0.1.0" }

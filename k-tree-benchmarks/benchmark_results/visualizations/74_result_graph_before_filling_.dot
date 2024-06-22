@@ -1,0 +1,15 @@
+graph {
+    0 [ label = "{NodeIndex(2), NodeIndex(3), NodeIndex(0), NodeIndex(1)}" ]
+    1 [ label = "{NodeIndex(1), NodeIndex(2), NodeIndex(4), NodeIndex(3)}" ]
+    2 [ label = "{NodeIndex(3), NodeIndex(8), NodeIndex(4), NodeIndex(2)}" ]
+    3 [ label = "{NodeIndex(4), NodeIndex(2), NodeIndex(9), NodeIndex(3)}" ]
+    4 [ label = "{NodeIndex(5), NodeIndex(3), NodeIndex(0), NodeIndex(1)}" ]
+    5 [ label = "{NodeIndex(5), NodeIndex(6), NodeIndex(3)}" ]
+    6 [ label = "{NodeIndex(2), NodeIndex(7), NodeIndex(1), NodeIndex(4)}" ]
+    1 -- 0 [ ]
+    2 -- 1 [ ]
+    4 -- 0 [ ]
+    3 -- 2 [ ]
+    6 -- 1 [ ]
+    5 -- 4 [ ]
+}

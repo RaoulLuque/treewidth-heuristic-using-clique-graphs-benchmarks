@@ -1,0 +1,23 @@
+n: 100 | k: 10 | p: 10 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|24.6 90.6   |86.9 38.3     |
+ 
+n: 100 | k: 20 | p: 10 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|70.8 9986.1 |88.8 187.1    |
+ 
+n: 100 | k: 10 | p: 15 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|33.9 88.4   |88.8 30.5     |
+ 
+n: 100 | k: 20 | p: 15 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|86.8 8846.8 |89.9 157.7    |
+ 
+n: 100 | k: 10 | p: 20 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|41.9 81.5   |89.1 28.5     |
+ 
+n: 200 | k: 10 | p: 10 
+| MTrNiTLd   | MTrNiTLdBC 2 |
+|35.4 328.8  |186.5 124.1   |

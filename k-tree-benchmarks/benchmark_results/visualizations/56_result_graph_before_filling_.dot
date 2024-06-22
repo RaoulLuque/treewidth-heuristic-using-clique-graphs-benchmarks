@@ -1,0 +1,17 @@
+graph {
+    0 [ label = "{NodeIndex(2), NodeIndex(0), NodeIndex(3), NodeIndex(1)}" ]
+    1 [ label = "{NodeIndex(1), NodeIndex(2), NodeIndex(4), NodeIndex(0)}" ]
+    2 [ label = "{NodeIndex(2), NodeIndex(4), NodeIndex(1), NodeIndex(6)}" ]
+    3 [ label = "{NodeIndex(4), NodeIndex(2), NodeIndex(5)}" ]
+    4 [ label = "{NodeIndex(2), NodeIndex(8), NodeIndex(0)}" ]
+    5 [ label = "{NodeIndex(5), NodeIndex(2), NodeIndex(8)}" ]
+    6 [ label = "{NodeIndex(7), NodeIndex(1), NodeIndex(6), NodeIndex(4)}" ]
+    7 [ label = "{NodeIndex(7), NodeIndex(6), NodeIndex(1), NodeIndex(9)}" ]
+    1 -- 0 [ ]
+    2 -- 1 [ ]
+    5 -- 3 [ ]
+    5 -- 4 [ ]
+    6 -- 2 [ ]
+    7 -- 6 [ ]
+    4 -- 0 [ ]
+}

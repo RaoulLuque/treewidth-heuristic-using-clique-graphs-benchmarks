@@ -1,0 +1,15 @@
+[workspace]
+
+members = [
+    "dimacs-benchmarks",
+    "k-tree-benchmarks"
+]
+resolver = "2"
+
+# Optimization in debug mode for own code
+[profile.dev]
+opt-level = 1
+
+# Optimiziation in debug mode for dependencies
+[profile.dev.package."*"]
+opt-level = 3
