@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use petgraph::{graph::NodeIndex, visit::GetAdjacencyMatrix, Graph};
+use petgraph::{graph::NodeIndex, Graph};
 use std::collections::HashSet;
 
 /// Greedy heuristic for computing an upper bound on the treewidth as described in
