@@ -61,6 +61,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "benchmark-suites"
+version = "0.1.0"
+dependencies = [
+ "petgraph",
+ "treewidth_heuristic_clique_graph",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -361,7 +369,7 @@ dependencies = [
 [[package]]
 name = "treewidth_heuristic_clique_graph"
 version = "0.1.0"
-source = "git+https://github.com/RaoulLuque/treewidth-heuristic-clique-graph#4a6cab60b0b7fb39759d993dd445afeb4e02f6ae"
+source = "git+https://github.com/RaoulLuque/treewidth-heuristic-clique-graph#23c50273b2b417906b9f1e68b6ce078eda3335c2"
 dependencies = [
  "itertools 0.13.0",
  "log",

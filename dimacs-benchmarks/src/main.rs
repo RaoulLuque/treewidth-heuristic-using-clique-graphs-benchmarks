@@ -21,11 +21,12 @@ fn main() {
     let number_of_repetitions_per_heuristic = 5;
 
     let mut benchmark_log_file =
-        File::create("dimacs_benchmarks/benchmark_results/dimacs_results.txt")
+        File::create("dimacs-benchmarks/benchmark_results/dimacs_results.txt")
             .expect("Dimacs log file should be creatable");
 
     // Sorting files in dimacs directory
-    let dimacs_graphs_paths: fs::ReadDir = fs::read_dir("dimacs_graphs/color/").unwrap();
+    let dimacs_graphs_paths: fs::ReadDir =
+        fs::read_dir("dimacs-benchmarks/dimacs_graphs/color/").unwrap();
     let mut dimacs_graph_paths_vec = Vec::new();
     for graph_path_res in dimacs_graphs_paths {
         if let Ok(graph_path) = graph_path_res {

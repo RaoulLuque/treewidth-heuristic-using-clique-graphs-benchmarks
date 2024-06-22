@@ -4,6 +4,7 @@ members = [
     "dimacs-benchmarks",
     "k-tree-benchmarks",
     "greedy-degree-fill-in-heuristic",
+    "benchmark-suites",
 ]
 resolver = "2"
 

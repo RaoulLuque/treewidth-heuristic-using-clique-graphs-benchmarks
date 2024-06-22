@@ -1,0 +1,12 @@
+[package]
+name = "benchmark-suites"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+authors = ["Raoul Luque <raoulsluque@gmail.com>"]
+description = "A collection of functions and constants used for different benchmarks"
+repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-benchmarks"
+
+[dependencies]
+treewidth_heuristic_clique_graph = { git = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph"}
+petgraph = "0.6.4"
