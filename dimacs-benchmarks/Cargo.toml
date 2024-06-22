@@ -5,7 +5,7 @@ edition = "2021"
 rust-version = "1.76"
 authors = ["Raoul Luque <raoulsluque@gmail.com>"]
 description = "Benchmarks for a heuristic for calculating an upper bound on treewidth of graphs using clique-graphs using dimacs graphs"
-repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph"
+repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-benchmarks"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }

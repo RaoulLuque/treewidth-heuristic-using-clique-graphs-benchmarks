@@ -1,0 +1,12 @@
+[package]
+name = "greedy-degree-fill-in-heuristic"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+authors = ["Raoul Luque <raoulsluque@gmail.com>"]
+description = "Greedy degree fill in heuristic for computing an upper bound on the treewidth as presented in https://doi.org/10.1016/j.ic.2009.03.008"
+repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-benchmarks"
+
+[dependencies]
+petgraph = "0.6.4"
+itertools = "0.13"
