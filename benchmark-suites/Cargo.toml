@@ -8,5 +8,6 @@ description = "A collection of functions and constants used for different benchm
 repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-benchmarks"
 
 [dependencies]
-treewidth_heuristic_clique_graph = { git = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph"}
+treewidth_heuristic_clique_graph = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-clique-graph"}
 petgraph = "0.6.4"
+csv = "1.3.0"
