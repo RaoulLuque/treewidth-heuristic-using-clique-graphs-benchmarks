@@ -6,6 +6,7 @@ use std::fs::{self, File};
 use std::time::SystemTime;
 
 use benchmark_suites::*;
+use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
 use treewidth_heuristic_clique_graph::compute_treewidth_upper_bound_not_connected;
 
 const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
@@ -134,8 +135,10 @@ fn main() {
             per_run_runtime_data.push(upper_bound_string);
 
             for heuristic in heuristics_variants_being_tested.iter() {
-                let edge_weight_heuristic = heuristic_to_edge_weight_heuristic(&heuristic);
-                let computation_type = heuristic_to_computation_type(&heuristic);
+                let spanning_tree_computation_and_edge_weight =
+                    heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic(
+                        &heuristic,
+                    );
                 let clique_bound = heuristic_to_clique_bound(&heuristic);
 
                 for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
@@ -144,28 +147,32 @@ fn main() {
                     // Time the calculation
                     let start = SystemTime::now();
 
-                    let computed_treewidth = match edge_weight_heuristic {
-                        EdgeWeightTypes::ReturnI32(edge_weight_heuristic) => {
-                            compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                    let computed_treewidth_upper_bound =
+                        match spanning_tree_computation_and_edge_weight {
+                            Some((
+                                computation_type,
+                                EdgeWeightTypes::ReturnI32(edge_weight_heuristic),
+                            )) => compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
                                 &graph,
                                 edge_weight_heuristic,
                                 computation_type,
                                 false,
                                 clique_bound,
-                            )
-                        }
-                        EdgeWeightTypes::ReturnI32Tuple(edge_weight_heuristic) => {
-                            compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                            ),
+                            Some((
+                                computation_type,
+                                EdgeWeightTypes::ReturnI32Tuple(edge_weight_heuristic),
+                            )) => compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
                                 &graph,
                                 edge_weight_heuristic,
                                 computation_type,
                                 false,
                                 clique_bound,
-                            )
-                        }
-                    };
+                            ),
+                            None => greedy_degree_fill_in_heuristic(&graph),
+                        };
 
-                    per_run_bound_data.push(computed_treewidth.to_string());
+                    per_run_bound_data.push(computed_treewidth_upper_bound.to_string());
                     per_run_runtime_data.push(
                         start
                             .elapsed()

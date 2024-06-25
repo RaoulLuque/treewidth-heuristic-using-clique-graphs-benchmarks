@@ -19,7 +19,10 @@ pub enum HeuristicTypes {
     // For comparison of spanning tree construction:
     FilWhINiTLd,
     FWhUEINiTLd, // Update edges in clique graph according to filling up whilst building spanning tree
-    FWGreINonee,
+    FWBagINonee,
+
+    // For comparison with GreedyX
+    GreedyDegreeFillIn,
 
     // For comparison with bounded clique
     FilWhINiTLdIBC(usize),
@@ -58,11 +61,11 @@ pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicTypes> {
 }
 
 pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
-    vec![MSTreINiTLd, FilWhINiTLd, FWhUEINiTLd, FWGreINonee]
+    vec![MSTreINiTLd, FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
 }
 
 pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicTypes> {
-    vec![FilWhINiTLd]
+    vec![FilWhINiTLd, GreedyDegreeFillIn]
 }
 
 impl std::fmt::Display for HeuristicTypes {
@@ -80,10 +83,11 @@ impl std::fmt::Display for HeuristicTypes {
             MSTreILdTNi => "MTrLdTNi".to_string(),
             FilWhILdTNi => "FiWhLdTNi".to_string(),
             FiWhTINiTLd => "FWTNiTLd".to_string(),
-            FWGreINonee => "FWB".to_string(),
+            FWBagINonee => "FWB".to_string(),
             MSTreINiTLdIBC(clique_bound) => format!("MTrNiTLdBC {}", clique_bound),
             FilWhINiTLdIBC(clique_bound) => format!("FiWhLdTNiBC {}", clique_bound),
             FiWhTINiTLdIBC(clique_bound) => format!("FWTNiTLd {}", clique_bound),
+            GreedyDegreeFillIn => format!("GreedyDegreeFillIn"),
         };
         write!(f, "{}", display_string)
     }
@@ -96,64 +100,92 @@ pub enum EdgeWeightTypes<S> {
 
 use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher};
 
-pub fn heuristic_to_edge_weight_heuristic<S: BuildHasher + Default>(
+pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
+    S: BuildHasher + Default,
+>(
     heuristic: &HeuristicTypes,
-) -> EdgeWeightTypes<S> {
+) -> Option<(
+    treewidth_heuristic_clique_graph::TreewidthComputationMethod,
+    EdgeWeightTypes<S>,
+)> {
+    use treewidth_heuristic_clique_graph::TreewidthComputationMethod::*;
     use treewidth_heuristic_clique_graph::*;
     use EdgeWeightTypes::*;
     match heuristic {
-        MSTreIUnion => ReturnI32(union),
-        MSTreIDisjU => ReturnI32(disjoint_union),
-        MSTreINegIn => ReturnI32(negative_intersection),
-        FilWhINegIn => ReturnI32(negative_intersection),
-        MSTreILeDif => ReturnI32(least_difference),
-        FilWhILeDif => ReturnI32(least_difference),
-        MSTreILdTNi => EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection),
-        FilWhILdTNi => {
-            EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection)
-        }
-        MSTreINiTLd => EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
-        FilWhINiTLd => EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
-        FWhUEINiTLd => EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
-        FiWhTINiTLd => {
-            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference)
-        }
-        FWGreINonee => EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
-        MSTreINiTLdIBC(_) => {
-            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference)
-        }
-        FilWhINiTLdIBC(_) => {
-            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference)
-        }
-        FiWhTINiTLdIBC(_) => {
-            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference)
-        }
+        MSTreIUnion => Some((MSTAndUseTreeStructure, ReturnI32(union))),
+        MSTreIDisjU => Some((MSTAndUseTreeStructure, ReturnI32(disjoint_union))),
+        MSTreINegIn => Some((MSTAndUseTreeStructure, ReturnI32(negative_intersection))),
+        FilWhINegIn => Some((FillWhilstMST, ReturnI32(negative_intersection))),
+        MSTreILeDif => Some((MSTAndUseTreeStructure, ReturnI32(least_difference))),
+        FilWhILeDif => Some((FillWhilstMST, ReturnI32(least_difference))),
+        MSTreILdTNi => Some((
+            MSTAndUseTreeStructure,
+            EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection),
+        )),
+        FilWhILdTNi => Some((
+            FillWhilstMST,
+            EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection),
+        )),
+        MSTreINiTLd => Some((
+            MSTAndUseTreeStructure,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FilWhINiTLd => Some((
+            FillWhilstMST,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FWhUEINiTLd => Some((
+            FillWhilstMSTEdgeUpdate,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FiWhTINiTLd => Some((
+            FillWhilstMSTTree,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FWBagINonee => Some((
+            FillWhilstMSTBagSize,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        MSTreINiTLdIBC(_) => Some((
+            MSTAndUseTreeStructure,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FilWhINiTLdIBC(_) => Some((
+            FillWhilstMST,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        FiWhTINiTLdIBC(_) => Some((
+            FillWhilstMSTTree,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
+        GreedyDegreeFillIn => None,
     }
 }
 
-pub fn heuristic_to_computation_type(
-    heuristic: &HeuristicTypes,
-) -> treewidth_heuristic_clique_graph::TreewidthComputationMethod {
-    use treewidth_heuristic_clique_graph::TreewidthComputationMethod::*;
-    match heuristic {
-        MSTreIUnion => MSTAndUseTreeStructure,
-        MSTreIDisjU => MSTAndUseTreeStructure,
-        MSTreINegIn => MSTAndUseTreeStructure,
-        FilWhINegIn => FillWhilstMST,
-        MSTreILeDif => MSTAndUseTreeStructure,
-        FilWhILeDif => FillWhilstMST,
-        MSTreILdTNi => MSTAndUseTreeStructure,
-        FilWhILdTNi => FillWhilstMST,
-        MSTreINiTLd => MSTAndUseTreeStructure,
-        FilWhINiTLd => FillWhilstMST,
-        FWhUEINiTLd => FillWhilstMSTEdgeUpdate,
-        FiWhTINiTLd => FillWhilstMSTTree,
-        FWGreINonee => FillWhilstMSTBagSize,
-        MSTreINiTLdIBC(_) => MSTAndUseTreeStructure,
-        FilWhINiTLdIBC(_) => FillWhilstMST,
-        FiWhTINiTLdIBC(_) => FillWhilstMSTTree,
-    }
-}
+// DEBUG
+// pub fn heuristic_to_computation_type(
+//     heuristic: &HeuristicTypes,
+// ) -> treewidth_heuristic_clique_graph::TreewidthComputationMethod {
+//     match heuristic {
+//         MSTreIUnion => MSTAndUseTreeStructure,
+//         MSTreIDisjU => MSTAndUseTreeStructure,
+//         MSTreINegIn => MSTAndUseTreeStructure,
+//         FilWhINegIn => FillWhilstMST,
+//         MSTreILeDif => MSTAndUseTreeStructure,
+//         FilWhILeDif => FillWhilstMST,
+//         MSTreILdTNi => MSTAndUseTreeStructure,
+//         FilWhILdTNi => FillWhilstMST,
+//         MSTreINiTLd => MSTAndUseTreeStructure,
+//         FilWhINiTLd => FillWhilstMST,
+//         FWhUEINiTLd => FillWhilstMSTEdgeUpdate,
+//         FiWhTINiTLd => FillWhilstMSTTree,
+//         FWBagINonee => FillWhilstMSTBagSize,
+//         MSTreINiTLdIBC(_) => MSTAndUseTreeStructure,
+//         FilWhINiTLdIBC(_) => FillWhilstMST,
+//         FiWhTINiTLdIBC(_) => FillWhilstMSTTree,
+//         GreedyDegreeFillIn => None,
+//     }
+// }
 
 pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
     match heuristic {
@@ -169,10 +201,11 @@ pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
         FilWhINiTLd => None,
         FWhUEINiTLd => None,
         FiWhTINiTLd => None,
-        FWGreINonee => None,
+        FWBagINonee => None,
         MSTreINiTLdIBC(clique_bound) => Some(*clique_bound),
         FilWhINiTLdIBC(clique_bound) => Some(*clique_bound),
         FiWhTINiTLdIBC(clique_bound) => Some(*clique_bound),
+        GreedyDegreeFillIn => None,
     }
 }
 
