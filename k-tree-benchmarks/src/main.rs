@@ -1,16 +1,20 @@
+use chrono::offset::Local;
+use csv::WriterBuilder;
+use petgraph::dot::{Config, Dot};
+use petgraph::graph::NodeIndex;
+use petgraph::Graph;
 use std::collections::HashSet;
 use std::fmt::Debug;
 use std::fs::{self, File};
 use std::io::Write;
-
-use petgraph::dot::{Config, Dot};
-use petgraph::graph::NodeIndex;
-use petgraph::Graph;
 use std::time::SystemTime;
+
+use benchmark_suites::*;
+use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
 use treewidth_heuristic_clique_graph::compute_treewidth_upper_bound_not_connected;
 
-// Use imports for benchmarking from dimacs_benchmarks crate
-use dimacs_benchmarks::*;
+const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
+const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
 
 // Debug version
 #[cfg(debug_assertions)]
@@ -82,21 +86,90 @@ pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 24] = [
 // ];
 
 fn main() {
-    // Opening log file
-    let mut benchmark_log_file =
-        File::create("k_tree_benchmarks/benchmark_results/k_tree_results.txt")
-            .expect("Dimacs log file should be creatable");
+    let date_and_time = Local::now()
+        .to_utc()
+        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
+        .to_string();
 
-    let number_of_repetitions_per_heuristic = 5;
+    for (heuristic_variants, benchmark_name) in TEST_SUITE {
+        println!("Starting new part of test_suite: {}", benchmark_name);
+        let heuristics_variants_being_tested = heuristic_variants();
 
-    for (n, k, p) in PARTIAL_K_TREE_CONFIGURATIONS {
-        let number_of_trees = 25;
+        // Creating writers
+        let mut per_run_runtime_writer = WriterBuilder::new().flexible(false).from_writer(
+            File::create(format!(
+                "k-tree-benchmarks/benchmark_results/{}_k-tree_per_run_runtime_{}.csv",
+                benchmark_name, date_and_time,
+            ))
+            .expect("k-tree log file should be creatable"),
+        );
 
-        println!("Starting calculation on graph: {:?}", (n, k, p));
-        let mut calculation_vec = Vec::new();
+        let mut average_runtime_writer = WriterBuilder::new().flexible(false).from_writer(
+            File::create(format!(
+                "k-tree-benchmarks/benchmark_results/{}_k-tree_average_runtime_{}.csv",
+                benchmark_name, date_and_time,
+            ))
+            .expect("k-tree log file should be creatable"),
+        );
 
-        for i in 0..number_of_trees {
-            let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
+        let mut per_run_bound_writer = WriterBuilder::new().flexible(false).from_writer(
+            File::create(format!(
+                "k-tree-benchmarks/benchmark_results/{}_k-tree_per_run_bound_{}.csv",
+                benchmark_name, date_and_time,
+            ))
+            .expect("k-tree log file should be creatable"),
+        );
+
+        let mut average_bound_writer = WriterBuilder::new().flexible(false).from_writer(
+            File::create(format!(
+                "k-tree-benchmarks/benchmark_results/{}_k-tree_average_bound_{}.csv",
+                benchmark_name, date_and_time,
+            ))
+            .expect("k-tree log file should be creatable"),
+        );
+
+        let mut header_vec: Vec<String> = Vec::new();
+        header_vec.push("Graph name".to_string());
+        header_vec.push("Upper Bound".to_string());
+        for heuristic in heuristics_variants_being_tested.iter() {
+            for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+                for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                    header_vec.push(format!("{}_tree_nr_{}", heuristic.to_string(), i));
+                }
+            }
+        }
+
+        // Write header to csvs
+        write_to_csv(
+            &mut header_vec.clone(),
+            &mut header_vec,
+            &mut average_bound_writer,
+            &mut per_run_bound_writer,
+            &mut average_runtime_writer,
+            &mut per_run_runtime_writer,
+            NUMBER_OF_REPETITIONS_PER_GRAPH,
+            true,
+        )
+        .expect("Writing to csv should be possible");
+
+        for (n, k, p) in PARTIAL_K_TREE_CONFIGURATIONS {
+            println!(
+                "{} Starting calculation on graph: {:?}",
+                Local::now().to_utc().time().format("%H:%M:%S"),
+                (n, k, p)
+            );
+
+            // Vec with vecs for each heuristic variant storing all results in successive order to merge together afterwards
+            let mut per_run_bound_data_multidimensional = Vec::new();
+            let mut per_run_runtime_data_multidimensional = Vec::new();
+
+            for _ in heuristics_variants_being_tested.iter() {
+                per_run_bound_data_multidimensional.push(Vec::new());
+                per_run_runtime_data_multidimensional.push(Vec::new());
+            }
+
+            for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+                let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
                 treewidth_heuristic_clique_graph::generate_partial_k_tree_with_guaranteed_treewidth(
                     k,
                     n,
@@ -105,106 +178,91 @@ fn main() {
                 )
                 .expect("n should be greater than k");
 
-            for heuristic_index in 0..HEURISTICS_BEING_TESTED.len() {
-                // Time the calculation
-                let start = SystemTime::now();
-                let mut treewidth: usize = usize::MAX;
+                for (heuristic_number, heuristic) in
+                    heuristics_variants_being_tested.iter().enumerate()
+                {
+                    let computation_method =
+                        heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic(
+                            heuristic,
+                        );
+                    let clique_bound = heuristic_to_clique_bound(heuristic);
 
-                let heuristic = &HEURISTICS_BEING_TESTED[heuristic_index];
-                let edge_weight_heuristic = heuristic_to_edge_weight_heuristic(heuristic);
-                let computation_type = heuristic_to_computation_type(heuristic);
-                let clique_bound = heuristic_to_clique_bound(heuristic);
+                    for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                        // DEBUG
+                        // println!(
+                        //     "n: {} k: {} p: {} Tree: {} Iteration: {} for heuristic: {:?}",
+                        //     n, k, p, i, j, heuristic
+                        // );
+                        // Time the calculation
+                        let start = SystemTime::now();
 
-                for j in 0..number_of_repetitions_per_heuristic {
-                    println!(
-                        "n: {} k: {} p: {} Tree: {} Iteration: {} for heuristic: {:?}",
-                        n, k, p, i, j, heuristic
-                    );
-
-                    let computed_treewidth = match edge_weight_heuristic {
-                        EdgeWeightTypes::ReturnI32(a) => {
-                            compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
-                                &graph,
-                                a,
-                                computation_type,
-                                false,
-                                clique_bound,
-                            )
-                        }
-                        EdgeWeightTypes::ReturnI32Tuple(a) => {
-                            compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
-                                &graph,
-                                a,
-                                computation_type,
-                                false,
-                                clique_bound,
-                            )
-                        }
-                    };
-
-                    if computed_treewidth < treewidth {
-                        treewidth = computed_treewidth;
+                        let computed_treewidth = match computation_method {
+                            Some((computation_type, EdgeWeightTypes::ReturnI32(a))) => {
+                                compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    &graph,
+                                    a,
+                                    computation_type,
+                                    false,
+                                    clique_bound,
+                                )
+                            }
+                            Some((computation_type, EdgeWeightTypes::ReturnI32Tuple(a))) => {
+                                compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    &graph,
+                                    a,
+                                    computation_type,
+                                    false,
+                                    clique_bound,
+                                )
+                            }
+                            None => greedy_degree_fill_in_heuristic(&graph),
+                        };
+                        per_run_bound_data_multidimensional
+                            .get_mut(heuristic_number)
+                            .expect("Index should be in bound by loop invariant")
+                            .push(computed_treewidth.to_string());
+                        per_run_runtime_data_multidimensional
+                            .get_mut(heuristic_number)
+                            .expect("Index should be in bound by loop invariant")
+                            .push(
+                                start
+                                    .elapsed()
+                                    .expect("Time should be trackable")
+                                    .as_millis()
+                                    .to_string(),
+                            );
                     }
                 }
-
-                if i == 0 {
-                    calculation_vec.push((
-                        treewidth,
-                        start
-                            .elapsed()
-                            .expect("Time should be trackable")
-                            .as_millis()
-                            / number_of_repetitions_per_heuristic,
-                    ))
-                } else {
-                    let (treewidth_sum, time_sum) = calculation_vec
-                        .get(heuristic_index)
-                        .expect("Values for calculation should exist");
-                    calculation_vec[heuristic_index] = (
-                        treewidth_sum + treewidth,
-                        time_sum
-                            + start
-                                .elapsed()
-                                .expect("Time should be trackable")
-                                .as_millis()
-                                / number_of_repetitions_per_heuristic,
-                    );
-                }
             }
+
+            let mut per_run_bound_data = Vec::new();
+            let mut per_run_runtime_data = Vec::new();
+
+            per_run_bound_data.push(format!("({};{};{})", n, k, p));
+            per_run_bound_data.push(k.to_string());
+            per_run_runtime_data.push(format!("({};{};{})", n, k, p));
+            per_run_runtime_data.push(k.to_string());
+
+            for bound_data_for_one_heuristic in per_run_bound_data_multidimensional.iter_mut() {
+                per_run_bound_data.append(bound_data_for_one_heuristic);
+            }
+
+            for runtime_data_for_one_heuristic in per_run_runtime_data_multidimensional.iter_mut() {
+                per_run_runtime_data.append(runtime_data_for_one_heuristic);
+            }
+
+            write_to_csv(
+                &mut per_run_bound_data,
+                &mut per_run_runtime_data,
+                &mut average_bound_writer,
+                &mut per_run_bound_writer,
+                &mut average_runtime_writer,
+                &mut per_run_runtime_writer,
+                NUMBER_OF_REPETITIONS_PER_GRAPH,
+                false,
+            )
+            .expect("Writing to csv should be possible");
         }
-        let calculation_vec: Vec<(f32, f32)> = calculation_vec
-            .iter()
-            .map(|(treewidth_sum, time_sum)| {
-                (
-                    *treewidth_sum as f32 / number_of_trees as f32,
-                    *time_sum as f32 / number_of_trees as f32,
-                )
-            })
-            .collect();
-
-        let mut log = format!("");
-
-        log.push_str(&format!("n: {} | k: {} | p: {} \n", n, k, p));
-
-        for heuristic in HEURISTICS_BEING_TESTED {
-            log.push_str(&format!("| {: <15} ", heuristic.to_string()))
-        }
-
-        log.push_str("|\n|");
-        for i in 0..HEURISTICS_BEING_TESTED.len() {
-            let current_value_tuple = calculation_vec.get(i).expect("Calculation should exist");
-            log.push_str(&format!(
-                " {: <7} {: <7} |",
-                format!("{:.1}", current_value_tuple.0),
-                format!("{:.1}", current_value_tuple.1)
-            ));
-        }
-
-        log.push_str("\n \n");
-
-        benchmark_log_file
-            .write_all(log.as_bytes())
-            .expect("Writing to Dimacs log file should be possible");
     }
 }
 

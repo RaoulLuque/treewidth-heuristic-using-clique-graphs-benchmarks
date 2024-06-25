@@ -328,7 +328,10 @@ dependencies = [
 name = "k-tree-benchmarks"
 version = "0.1.0"
 dependencies = [
- "dimacs-benchmarks",
+ "benchmark-suites",
+ "chrono",
+ "csv",
+ "greedy-degree-fill-in-heuristic",
  "petgraph",
  "rand",
  "rustc-hash",

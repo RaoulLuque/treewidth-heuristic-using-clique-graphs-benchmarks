@@ -286,7 +286,7 @@ pub fn write_to_csv(
         let mut average_runtime_header: Vec<String> = Vec::new();
         let mut offset_counter = 1;
         let mut average_runtime: f64 = 0.0;
-        let mut average_bound: f64 = 0.0;
+        let mut average_bound: f64 = f64::MAX;
 
         for i in 0..per_run_bound_data.len() {
             if i == 0 || i == 1 {
@@ -305,7 +305,6 @@ pub fn write_to_csv(
             } else {
                 if offset_counter == number_of_runs_per_graph {
                     average_runtime /= number_of_runs_per_graph as f64;
-                    average_bound /= number_of_runs_per_graph as f64;
 
                     average_bound_data.push(average_bound);
                     average_runtime_data.push(average_runtime);
@@ -322,22 +321,23 @@ pub fn write_to_csv(
 
                     offset_counter = 1;
                 } else {
-                    average_bound += per_run_bound_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .parse::<f64>()
-                        .expect("Entries of data vectors should be valid f64");
+                    average_bound = average_bound.min(
+                        per_run_bound_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .parse::<f64>()
+                            .expect("Entries of data vectors should be valid f64"),
+                    );
                     average_runtime += per_run_runtime_data
                         .get(i)
                         .expect("Index should be in bound by loop invariant")
                         .parse::<f64>()
                         .expect("Entries of data vectors should be valid f64");
                     offset_counter += 1;
-
-                    // if i == per_run_bound_data.len() - 1 {
-                    //     average_bound_data.push(average_bound);
-                    //     average_runtime_data.push(average_runtime);
-                    // }
+                    if i == per_run_bound_data.len() - 1 {
+                        average_bound_data.push(average_bound);
+                        average_runtime_data.push(average_runtime);
+                    }
                 }
             }
         }
