@@ -1,17 +1,19 @@
 use itertools::Itertools;
-use petgraph::{graph::NodeIndex, Graph};
+use petgraph::{graph::NodeIndex, Graph, Undirected};
 use std::collections::HashSet;
 
 /// Greedy heuristic for computing an upper bound on the treewidth as described in
 /// [this](https://doi.org/10.1016/j.ic.2009.03.008) paper by Bodlaender and Koster
 /// (this variant is Greedy Degree + Fill In).
-pub fn greedy_degree_fill_in_heuristic<N: Clone, E: Clone + Default>(graph: &Graph<N, E>) -> usize {
+pub fn greedy_degree_fill_in_heuristic<N: Clone, E: Clone + Default>(
+    graph: &Graph<N, E, Undirected>,
+) -> usize {
     greedy_degree_fill_in(graph).1
 }
 
 /// See [greedy_degree_fill_in_heuristic]
 fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
-    graph: &Graph<N, E>,
+    graph: &Graph<N, E, Undirected>,
 ) -> (Vec<NodeIndex>, usize) {
     let mut elimination_ordering: Vec<_> = Vec::with_capacity(graph.node_count());
     let mut treewidth_upper_bound: usize = usize::MAX;
