@@ -26,6 +26,7 @@ fn main() {
         .to_string();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
+        println!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
         // Creating writers
@@ -110,7 +111,11 @@ fn main() {
                 _,
             ) = read_graph(graph_file).expect("Graph should be in correct format");
 
-            println!("Starting calculation on graph: {:?}", graph_file_name);
+            println!(
+                "{} Starting calculation on graph: {:?}",
+                Local::now().to_utc().time().format("%H:%M:%S"),
+                graph_file_name
+            );
             let mut per_run_bound_data = Vec::new();
             let mut per_run_runtime_data = Vec::new();
             let graph_file_name_string = graph_file_name
@@ -133,8 +138,9 @@ fn main() {
                 let computation_type = heuristic_to_computation_type(&heuristic);
                 let clique_bound = heuristic_to_clique_bound(&heuristic);
 
-                for i in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
-                    println!("Iteration: {} for heuristic: {:?}", i, heuristic);
+                for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                    // DEBUG
+                    // println!("Iteration: {} for heuristic: {:?}", i, heuristic);
                     // Time the calculation
                     let start = SystemTime::now();
 
