@@ -84,7 +84,7 @@ pub enum EdgeWeightTypes<S> {
     ReturnI32Tuple(fn(&HashSet<NodeIndex, S>, &HashSet<NodeIndex, S>) -> (i32, i32)),
 }
 
-use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher, io};
+use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher};
 
 pub fn heuristic_to_edge_weight_heuristic<S: BuildHasher + Default>(
     heuristic: &HeuristicTypes,
@@ -176,82 +176,12 @@ pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
     }
 }
 
-/// Per Run Bound&Runtime Data should be of the form
-/// Graphname HeuristicVersion1ComputedBoundFirstRun HeuristicVersion1ComputedBoundSecondRun ... HeuristicVersion1ComputedBoundNumber_of_runs_per_graph-thRun HeuristicVersion2 ....
-pub fn write_to_csv(
-    per_run_bound_data: Vec<usize>,
-    per_run_runtime_data: Vec<usize>,
-    average_bound_writer: &mut Writer<File>,
-    per_run_bound_writer: &mut Writer<File>,
-    average_runtime_writer: &mut Writer<File>,
-    per_run_runtime_writer: &mut Writer<File>,
-    number_of_runs_per_graph: usize,
-) -> Result<(), Box<dyn Error>> {
-    let mut average_bound_data: Vec<usize> = Vec::new();
-    let mut average_runtime_data: Vec<usize> = Vec::new();
-    let mut offset_counter = 0;
-    let mut average_runtime = 0;
-    let mut average_bound = 0;
-
-    for i in 0..per_run_bound_data.len() {
-        if i == 0 {
-            average_bound_data.push(
-                *per_run_bound_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant"),
-            );
-            average_runtime_data.push(
-                *per_run_runtime_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant"),
-            );
-        } else {
-            if offset_counter == number_of_runs_per_graph {
-                average_bound_data.push(average_bound);
-                average_runtime_data.push(average_runtime);
-                average_bound = *per_run_bound_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant");
-                average_runtime = *per_run_runtime_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant");
-
-                offset_counter = 1;
-            } else {
-                average_bound += per_run_bound_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant");
-                average_runtime += per_run_runtime_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant");
-                offset_counter += 1;
-
-                if i == per_run_bound_data.len() - 1 {
-                    average_bound_data.push(average_bound);
-                    average_runtime_data.push(average_runtime);
-                }
-            }
-        }
-    }
-
-    let per_run_bound_data: Vec<_> = per_run_bound_data.iter().map(|u| u.to_string()).collect();
-    let per_run_runtime_data: Vec<_> = per_run_runtime_data.iter().map(|u| u.to_string()).collect();
-
-    let average_bound_data: Vec<_> = average_bound_data.iter().map(|u| u.to_string()).collect();
-    let average_runtime_data: Vec<_> = average_runtime_data.iter().map(|u| u.to_string()).collect();
-
-    per_run_bound_writer.write_record(per_run_bound_data)?;
-    per_run_runtime_writer.write_record(per_run_runtime_data)?;
-
-    average_bound_writer.write_record(average_bound_data)?;
-    average_runtime_writer.write_record(average_runtime_data)?;
-
-    Ok(())
-}
-
 /// Per Run Bound&Runtime Data Header should be of the form
 /// Graph HeuristicVersion1 HeuristicVersion1 ... HeuristicVersion1 (number_of_runs_per_graph often) HeuristicVersion2 ...
-pub fn write_header_to_csv(
+///
+/// Per Run Bound&Runtime Data should be of the form
+/// Graph name HeuristicVersion1ComputedBoundFirstRun HeuristicVersion1ComputedBoundSecondRun ... HeuristicVersion1ComputedBoundNumber_of_runs_per_graph-thRun HeuristicVersion2 ....
+pub fn write_to_csv(
     per_run_bound_data: &mut Vec<String>,
     per_run_runtime_data: &mut Vec<String>,
     average_bound_writer: &mut Writer<File>,
@@ -259,51 +189,141 @@ pub fn write_header_to_csv(
     average_runtime_writer: &mut Writer<File>,
     per_run_runtime_writer: &mut Writer<File>,
     number_of_runs_per_graph: usize,
+    header: bool,
 ) -> Result<(), Box<dyn Error>> {
-    let mut average_bound_data_header: Vec<_> = Vec::new();
-    let mut average_runtime_data_header: Vec<_> = Vec::new();
-    let mut offset_counter = 0;
+    if header {
+        let mut average_bound_data: Vec<_> = Vec::new();
+        let mut average_runtime_data: Vec<_> = Vec::new();
+        let mut offset_counter = 1;
 
-    for i in 0..per_run_bound_data.len() {
-        if i == 0 {
-            average_bound_data_header.push(
-                per_run_bound_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant")
-                    .to_owned(),
-            );
-            average_runtime_data_header.push(
-                per_run_runtime_data
-                    .get(i)
-                    .expect("Index should be in bound by loop invariant")
-                    .to_owned(),
-            );
-        } else {
-            if offset_counter == number_of_runs_per_graph {
-                average_bound_data_header.push(
+        println!(
+            "Per Run Bound Data Header length: {:?}",
+            per_run_bound_data.len()
+        );
+
+        for i in 0..per_run_bound_data.len() {
+            if i == 0 || i == 1 {
+                average_bound_data.push(
                     per_run_bound_data
                         .get(i)
                         .expect("Index should be in bound by loop invariant")
                         .to_owned(),
                 );
-                average_runtime_data_header.push(
+                average_runtime_data.push(
                     per_run_runtime_data
                         .get(i)
                         .expect("Index should be in bound by loop invariant")
                         .to_owned(),
                 );
-                offset_counter = 1;
             } else {
-                offset_counter += 1;
+                if offset_counter == number_of_runs_per_graph {
+                    average_bound_data.push(
+                        per_run_bound_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned(),
+                    );
+                    average_runtime_data.push(
+                        per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned(),
+                    );
+                    offset_counter = 1;
+                } else {
+                    offset_counter += 1;
+                }
             }
         }
+        println!("Writing to writers");
+        println!("Trying to write: {:?}", average_bound_data);
+        per_run_bound_writer.write_record(per_run_bound_data)?;
+        per_run_runtime_writer.write_record(per_run_runtime_data)?;
+
+        average_bound_writer.write_record(average_bound_data)?;
+        average_runtime_writer.write_record(average_runtime_data)?;
+    } else {
+        let mut average_bound_data: Vec<f64> = Vec::new();
+        let mut average_bound_header: Vec<String> = Vec::new();
+        let mut average_runtime_data: Vec<f64> = Vec::new();
+        let mut average_runtime_header: Vec<String> = Vec::new();
+        let mut offset_counter = 1;
+        let mut average_runtime: f64 = 0.0;
+        let mut average_bound: f64 = 0.0;
+
+        for i in 0..per_run_bound_data.len() {
+            if i == 0 || i == 1 {
+                average_bound_header.push(
+                    per_run_bound_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .to_owned(),
+                );
+                average_runtime_header.push(
+                    per_run_runtime_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .to_owned(),
+                );
+            } else {
+                if offset_counter == number_of_runs_per_graph {
+                    average_runtime /= number_of_runs_per_graph as f64;
+                    average_bound /= number_of_runs_per_graph as f64;
+
+                    average_bound_data.push(average_bound);
+                    average_runtime_data.push(average_runtime);
+                    average_bound = per_run_bound_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .parse::<f64>()
+                        .expect("Entries of data vectors should be valid f64");
+                    average_runtime = per_run_runtime_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .parse::<f64>()
+                        .expect("Entries of data vectors should be valid f64");
+
+                    offset_counter = 1;
+                } else {
+                    average_bound += per_run_bound_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .parse::<f64>()
+                        .expect("Entries of data vectors should be valid f64");
+                    average_runtime += per_run_runtime_data
+                        .get(i)
+                        .expect("Index should be in bound by loop invariant")
+                        .parse::<f64>()
+                        .expect("Entries of data vectors should be valid f64");
+                    offset_counter += 1;
+
+                    // if i == per_run_bound_data.len() - 1 {
+                    //     average_bound_data.push(average_bound);
+                    //     average_runtime_data.push(average_runtime);
+                    // }
+                }
+            }
+        }
+
+        let average_bound_data: Vec<String> = average_bound_header
+            .into_iter()
+            .chain(average_bound_data.iter().map(|u| u.to_string()))
+            .collect();
+        let average_runtime_data: Vec<_> = average_runtime_header
+            .into_iter()
+            .chain(average_runtime_data.iter().map(|u| u.to_string()))
+            .collect();
+
+        per_run_bound_writer.write_record(per_run_bound_data)?;
+        per_run_runtime_writer.write_record(per_run_runtime_data)?;
+
+        average_bound_writer.write_record(average_bound_data)?;
+        average_runtime_writer.write_record(average_runtime_data)?;
     }
-
-    per_run_bound_writer.write_record(per_run_bound_data)?;
-    per_run_runtime_writer.write_record(per_run_runtime_data)?;
-
-    average_bound_writer.write_record(average_bound_data_header)?;
-    average_runtime_writer.write_record(average_runtime_data_header)?;
+    per_run_bound_writer.flush()?;
+    per_run_runtime_writer.flush()?;
+    average_bound_writer.flush()?;
+    average_runtime_writer.flush()?;
 
     Ok(())
 }

@@ -1,9 +1,8 @@
 use chrono::offset::Local;
-use csv::Writer;
+use csv::{Writer, WriterBuilder};
 use dimacs_petgraph_parser::read_graph;
 use petgraph::Graph;
 use std::fs::{self, File};
-use std::io::Write;
 use std::time::SystemTime;
 
 use benchmark_suites::*;
@@ -30,33 +29,33 @@ fn main() {
         let heuristics_variants_being_tested = heuristic_variants();
 
         // Creating writers
-        let mut per_run_runtime_writer = Writer::from_writer(
+        let mut per_run_runtime_writer = WriterBuilder::new().flexible(false).from_writer(
             File::create(format!(
-                "dimacs-benchmarks/benchmark_results/{}_dimacs_per_run_runtime_{}",
+                "dimacs-benchmarks/benchmark_results/{}_dimacs_per_run_runtime_{}.csv",
                 benchmark_name, date_and_time,
             ))
             .expect("Dimacs log file should be creatable"),
         );
 
-        let mut average_runtime_writer = Writer::from_writer(
+        let mut average_runtime_writer = WriterBuilder::new().flexible(false).from_writer(
             File::create(format!(
-                "dimacs-benchmarks/benchmark_results/{}_dimacs_average_runtime_{}",
+                "dimacs-benchmarks/benchmark_results/{}_dimacs_average_runtime_{}.csv",
                 benchmark_name, date_and_time,
             ))
             .expect("Dimacs log file should be creatable"),
         );
 
-        let mut per_run_bound_writer = Writer::from_writer(
+        let mut per_run_bound_writer = WriterBuilder::new().flexible(false).from_writer(
             File::create(format!(
-                "dimacs-benchmarks/benchmark_results/{}_dimacs_per_run_runtime_{}",
+                "dimacs-benchmarks/benchmark_results/{}_dimacs_per_run_bound_{}.csv",
                 benchmark_name, date_and_time,
             ))
             .expect("Dimacs log file should be creatable"),
         );
 
-        let mut average_bound_writer = Writer::from_writer(
+        let mut average_bound_writer = WriterBuilder::new().flexible(false).from_writer(
             File::create(format!(
-                "dimacs-benchmarks/benchmark_results/{}_dimacs_average_runtime_{}",
+                "dimacs-benchmarks/benchmark_results/{}_dimacs_average_bound_{}.csv",
                 benchmark_name, date_and_time,
             ))
             .expect("Dimacs log file should be creatable"),
@@ -64,11 +63,15 @@ fn main() {
 
         let mut header_vec: Vec<String> = Vec::new();
         header_vec.push("Graph name".to_string());
+        header_vec.push("Upper Bound".to_string());
         for heuristic in heuristics_variants_being_tested.iter() {
-            header_vec.push(heuristic.to_string());
+            for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                header_vec.push(heuristic.to_string());
+            }
         }
 
-        write_header_to_csv(
+        // Write header to csvs
+        write_to_csv(
             &mut header_vec.clone(),
             &mut header_vec,
             &mut average_bound_writer,
@@ -76,6 +79,7 @@ fn main() {
             &mut average_runtime_writer,
             &mut per_run_runtime_writer,
             NUMBER_OF_REPETITIONS_PER_GRAPH,
+            true,
         )
         .expect("Writing to csv should be possible");
 
@@ -94,12 +98,6 @@ fn main() {
         }
         dimacs_graph_paths_vec.sort_by(|a, b| b.file_name().cmp(&a.file_name()));
 
-        let mut log = "".to_string();
-        log.push_str(&format!(
-            "| {0: <20} | {1: <12} |",
-            "Graph name", "Upper bound"
-        ));
-
         for graph_path in dimacs_graph_paths_vec {
             let graph_file_name = graph_path.file_name();
             let graph_file =
@@ -113,18 +111,33 @@ fn main() {
             ) = read_graph(graph_file).expect("Graph should be in correct format");
 
             println!("Starting calculation on graph: {:?}", graph_file_name);
-            let mut calculation_vec = Vec::new();
-            for heuristic in heuristics_variants_being_tested.iter() {
-                // Time the calculation
-                let start = SystemTime::now();
-                let mut treewidth: usize = usize::MAX;
+            let mut per_run_bound_data = Vec::new();
+            let mut per_run_runtime_data = Vec::new();
+            let graph_file_name_string = graph_file_name
+                .into_string()
+                .expect("Graph file name should be a valid utf8 String");
 
+            // Convert optional upper bound to string
+            let upper_bound_string = match upper_bound {
+                Some(i) => i.to_string(),
+                None => "None".to_string(),
+            };
+
+            per_run_bound_data.push(graph_file_name_string.to_owned());
+            per_run_bound_data.push(upper_bound_string.to_owned());
+            per_run_runtime_data.push(graph_file_name_string);
+            per_run_runtime_data.push(upper_bound_string);
+
+            for heuristic in heuristics_variants_being_tested.iter() {
                 let edge_weight_heuristic = heuristic_to_edge_weight_heuristic(&heuristic);
                 let computation_type = heuristic_to_computation_type(&heuristic);
                 let clique_bound = heuristic_to_clique_bound(&heuristic);
 
                 for i in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
                     println!("Iteration: {} for heuristic: {:?}", i, heuristic);
+                    // Time the calculation
+                    let start = SystemTime::now();
+
                     let computed_treewidth = match edge_weight_heuristic {
                         EdgeWeightTypes::ReturnI32(edge_weight_heuristic) => {
                             compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
@@ -146,22 +159,28 @@ fn main() {
                         }
                     };
 
-                    if computed_treewidth < treewidth {
-                        treewidth = computed_treewidth;
-                    }
+                    per_run_bound_data.push(computed_treewidth.to_string());
+                    per_run_runtime_data.push(
+                        start
+                            .elapsed()
+                            .expect("Time should be trackable")
+                            .as_millis()
+                            .to_string(),
+                    );
                 }
-
-                calculation_vec.push((
-                    treewidth,
-                    start
-                        .elapsed()
-                        .expect("Time should be trackable")
-                        .as_millis()
-                        / 1,
-                ))
             }
 
-            log.push_str("\n");
+            write_to_csv(
+                &mut per_run_bound_data,
+                &mut per_run_runtime_data,
+                &mut average_bound_writer,
+                &mut per_run_bound_writer,
+                &mut average_runtime_writer,
+                &mut per_run_runtime_writer,
+                NUMBER_OF_REPETITIONS_PER_GRAPH,
+                false,
+            )
+            .expect("Writing to csv should be possible");
         }
     }
 }
