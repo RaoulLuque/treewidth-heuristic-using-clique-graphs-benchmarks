@@ -21,9 +21,14 @@ type Hasher = std::hash::RandomState;
 
 fn main() {
     env_logger::init();
-    let date_and_time = Local::now().to_string();
+    let date_and_time = Local::now()
+        .to_utc()
+        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
+        .to_string();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
+        let heuristics_variants_being_tested = heuristic_variants();
+
         // Creating writers
         let mut per_run_runtime_writer = Writer::from_writer(
             File::create(format!(
@@ -57,7 +62,22 @@ fn main() {
             .expect("Dimacs log file should be creatable"),
         );
 
+        let mut header_vec: Vec<String> = Vec::new();
+        header_vec.push("Graph name".to_string());
+        for heuristic in heuristics_variants_being_tested.iter() {
+            header_vec.push(heuristic.to_string());
+        }
 
+        write_header_to_csv(
+            &mut header_vec.clone(),
+            &mut header_vec,
+            &mut average_bound_writer,
+            &mut per_run_bound_writer,
+            &mut average_runtime_writer,
+            &mut per_run_runtime_writer,
+            NUMBER_OF_REPETITIONS_PER_GRAPH,
+        )
+        .expect("Writing to csv should be possible");
 
         // Sorting files in dimacs directory
         let dimacs_graphs_paths: fs::ReadDir =
@@ -80,14 +100,6 @@ fn main() {
             "Graph name", "Upper bound"
         ));
 
-        let header_vec: Vec<_> = Vec::new();
-        header_vec.push("Graph name");
-        for heuristic in HEURISTICS_BEING_TESTED {
-            let heuristic_string = heuristic.to_string();
-            log.push_str(&format!(" {0: <15} |", heuristic_string))
-        }
-        log.push_str("\n");
-
         for graph_path in dimacs_graph_paths_vec {
             let graph_file_name = graph_path.file_name();
             let graph_file =
@@ -102,7 +114,7 @@ fn main() {
 
             println!("Starting calculation on graph: {:?}", graph_file_name);
             let mut calculation_vec = Vec::new();
-            for heuristic in HEURISTICS_BEING_TESTED {
+            for heuristic in heuristics_variants_being_tested.iter() {
                 // Time the calculation
                 let start = SystemTime::now();
                 let mut treewidth: usize = usize::MAX;
@@ -145,15 +157,11 @@ fn main() {
                         .elapsed()
                         .expect("Time should be trackable")
                         .as_millis()
-                        / NUMBER_OF_REPETITIONS_PER_GRAPH,
+                        / 1,
                 ))
             }
 
             log.push_str("\n");
-
-            benchmark_log_file
-                .write_all(log.as_bytes())
-                .expect("Writing to Dimacs log file should be possible");
         }
     }
 }

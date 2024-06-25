@@ -1,1 +1,0 @@
-| Graph name           | Upper bound  | MTrNiTLd        | MTrNiTLdBC 2    | MTrNiTLdBC 3    | MTrNiTLdBC 10   | FiWhNiTLd       | FiWhLdTNiBC 2   | FiWhLdTNiBC 3   | FiWhLdTNiBC 10  |
