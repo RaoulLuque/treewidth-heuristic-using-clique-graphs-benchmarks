@@ -47,12 +47,12 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
         "comparison_of_combined_edge_weights",
     ),
     (
-        comparison_of_spanning_tree_construction,
-        "comparison_of_spanning_tree_construction",
-    ),
-    (
         comparison_with_greedy_degree_fill_in,
         "comparison_with_greedy_degree_fill_in",
+    ),
+    (
+        comparison_of_spanning_tree_construction,
+        "comparison_of_spanning_tree_construction",
     ),
 ];
 
