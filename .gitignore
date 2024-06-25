@@ -1,5 +1,5 @@
 /target
 /test_results
-/k_tree_benchmarks/benchmark_results
-dimacs_benchmarks/benchmark_results
+/k-tree-benchmarks/benchmark_results
+/dimacs-benchmarks/benchmark_results
 /.vscode
