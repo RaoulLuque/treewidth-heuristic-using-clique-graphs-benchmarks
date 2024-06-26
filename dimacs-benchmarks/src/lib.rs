@@ -1,4 +1,4 @@
-use treewidth_heuristic_clique_graph::TreewidthComputationMethod::*;
+use treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod::*;
 
 #[derive(Debug)]
 pub enum HeuristicTypes {
@@ -74,7 +74,7 @@ pub const HEURISTICS_BEING_TESTED: [HeuristicTypes; 8] = [
 pub fn heuristic_to_edge_weight_heuristic<S: BuildHasher + Default>(
     heuristic: &HeuristicTypes,
 ) -> EdgeWeightTypes<S> {
-    use treewidth_heuristic_clique_graph::*;
+    use treewidth_heuristic_using_clique_graphs::*;
     use HeuristicTypes::*;
     match heuristic {
         MstTreeNi => EdgeWeightTypes::ReturnI32(negative_intersection),
@@ -116,7 +116,7 @@ pub fn heuristic_to_edge_weight_heuristic<S: BuildHasher + Default>(
 
 pub fn heuristic_to_computation_type(
     heuristic: &HeuristicTypes,
-) -> treewidth_heuristic_clique_graph::TreewidthComputationMethod {
+) -> treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod {
     match heuristic {
         MstTreeNi => MSTAndUseTreeStructure,
         FillWhileNi => FillWhilstMST,

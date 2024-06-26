@@ -117,11 +117,11 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
 >(
     heuristic: &HeuristicTypes,
 ) -> Option<(
-    treewidth_heuristic_clique_graph::TreewidthComputationMethod,
+    treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod,
     EdgeWeightTypes<S>,
 )> {
-    use treewidth_heuristic_clique_graph::TreewidthComputationMethod::*;
-    use treewidth_heuristic_clique_graph::*;
+    use treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod::*;
+    use treewidth_heuristic_using_clique_graphs::*;
     use EdgeWeightTypes::*;
     match heuristic {
         MSTreIUnion => Some((MSTAndUseTreeStructure, ReturnI32(union))),
@@ -177,7 +177,7 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
 // DEBUG
 // pub fn heuristic_to_computation_type(
 //     heuristic: &HeuristicTypes,
-// ) -> treewidth_heuristic_clique_graph::TreewidthComputationMethod {
+// ) -> treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod {
 //     match heuristic {
 //         MSTreIUnion => MSTAndUseTreeStructure,
 //         MSTreIDisjU => MSTAndUseTreeStructure,

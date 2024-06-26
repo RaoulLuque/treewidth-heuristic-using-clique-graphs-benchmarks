@@ -11,7 +11,7 @@ use std::time::SystemTime;
 
 use benchmark_suites::*;
 use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
-use treewidth_heuristic_clique_graph::compute_treewidth_upper_bound_not_connected;
+use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_connected;
 
 const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
 const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
@@ -168,9 +168,9 @@ fn main() {
                 per_run_runtime_data_multidimensional.push(Vec::new());
             }
 
-            for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+            for _ in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
                 let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
-                treewidth_heuristic_clique_graph::generate_partial_k_tree_with_guaranteed_treewidth(
+                treewidth_heuristic_using_clique_graphs::generate_partial_k_tree_with_guaranteed_treewidth(
                     k,
                     n,
                     p,
@@ -187,12 +187,7 @@ fn main() {
                         );
                     let clique_bound = heuristic_to_clique_bound(heuristic);
 
-                    for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
-                        // DEBUG
-                        // println!(
-                        //     "n: {} k: {} p: {} Tree: {} Iteration: {} for heuristic: {:?}",
-                        //     n, k, p, i, j, heuristic
-                        // );
+                    for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
                         // Time the calculation
                         let start = SystemTime::now();
 
@@ -268,6 +263,7 @@ fn main() {
 
 // Converting dot files to pdf in bulk:
 // FullPath -type f -name "*.dot" | xargs dot -Tpdf -O
+#[allow(dead_code)]
 fn create_dot_files<O: Debug, S>(
     graph: &Graph<i32, i32, petgraph::prelude::Undirected>,
     clique_graph: &Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,

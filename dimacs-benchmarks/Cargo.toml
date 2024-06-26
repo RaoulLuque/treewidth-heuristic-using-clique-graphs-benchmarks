@@ -10,7 +10,7 @@ repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-ben
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 petgraph = "0.6.4"
-treewidth_heuristic_clique_graph = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-clique-graph"}
+treewidth-heuristic-using-clique-graphs = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-using-clique-graphs"}
 benchmark-suites = { path = "../benchmark-suites"}
 greedy-degree-fill-in-heuristic = { path = "../greedy-degree-fill-in-heuristic"}
 dimacs_petgraph_parser = { git = "https://github.com/RaoulLuque/dimacs-petgraph-parser" }

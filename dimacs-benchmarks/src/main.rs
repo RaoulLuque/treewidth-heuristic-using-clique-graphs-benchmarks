@@ -1,5 +1,5 @@
 use chrono::offset::Local;
-use csv::{Writer, WriterBuilder};
+use csv::WriterBuilder;
 use dimacs_petgraph_parser::read_graph;
 use petgraph::Graph;
 use std::fs::{self, File};
@@ -7,7 +7,7 @@ use std::time::SystemTime;
 
 use benchmark_suites::*;
 use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
-use treewidth_heuristic_clique_graph::compute_treewidth_upper_bound_not_connected;
+use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_connected;
 
 const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
 

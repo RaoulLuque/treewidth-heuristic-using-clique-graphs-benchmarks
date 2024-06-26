@@ -90,17 +90,14 @@ mod tests {
     #[test]
     fn test_heuristic_on_k_tree() {
         use rand::Rng;
-        use treewidth_heuristic_clique_graph::generate_k_tree;
+        use treewidth_heuristic_using_clique_graphs::generate_k_tree;
 
         for _ in 0..25 {
             let mut rng = rand::thread_rng();
 
-            let n = 108;
-            let k = 28;
-
-            // let k: usize = (rng.gen::<f32>() * 50.0) as usize;
-            // // n should be strictly greater than k otherwise k_tree has not guaranteed treewidth k
-            // let n: usize = (rng.gen::<f32>() * 100.0) as usize + k + 1;
+            let k: usize = (rng.gen::<f32>() * 50.0) as usize;
+            // n should be strictly greater than k otherwise k_tree has not guaranteed treewidth k
+            let n: usize = (rng.gen::<f32>() * 100.0) as usize + k + 1;
 
             let k_tree: Graph<i32, i32, petgraph::prelude::Undirected> =
                 generate_k_tree(k, n).expect("k should be smaller or eq to n");

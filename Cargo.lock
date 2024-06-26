@@ -87,7 +87,7 @@ version = "0.1.0"
 dependencies = [
  "csv",
  "petgraph",
- "treewidth_heuristic_clique_graph",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -168,7 +168,7 @@ dependencies = [
  "petgraph",
  "rustc-hash",
  "serde",
- "treewidth_heuristic_clique_graph",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -239,7 +239,7 @@ dependencies = [
  "itertools 0.13.0",
  "petgraph",
  "rand",
- "treewidth_heuristic_clique_graph",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -338,7 +338,7 @@ dependencies = [
  "rand",
  "rustc-hash",
  "serde",
- "treewidth_heuristic_clique_graph",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -510,11 +510,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "treewidth_heuristic_clique_graph"
+name = "treewidth-heuristic-using-clique-graphs"
 version = "0.1.0"
 dependencies = [
  "itertools 0.13.0",
- "log",
  "petgraph",
  "rand",
  "rustc-hash",
