@@ -16,7 +16,7 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
     graph: &Graph<N, E, Undirected>,
 ) -> (Vec<NodeIndex>, usize) {
     let mut elimination_ordering: Vec<_> = Vec::with_capacity(graph.node_count());
-    let mut treewidth_upper_bound: usize = usize::MAX;
+    let mut treewidth_upper_bound: usize = 0;
     let mut number_of_iterations = 0;
     let mut graph_copy = graph.clone();
     let mut remaining_vertices: HashSet<NodeIndex> = graph.node_indices().collect();
@@ -63,7 +63,11 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
         }
         // Treewidth is max number of neighbors that appear after a vertex v in the final
         // elimination ordering (maximizing over the v in the elimination ordering)
-        treewidth_upper_bound = treewidth_upper_bound.max(edges_to_be_added.len());
+        treewidth_upper_bound = treewidth_upper_bound.max(
+            remaining_vertices
+                .intersection(&graph_copy.neighbors(current_vertex).collect::<HashSet<_>>())
+                .count(),
+        );
 
         for (x, y) in edges_to_be_added {
             graph_copy.add_edge(x, y, E::default());
@@ -75,4 +79,35 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
     }
 
     (elimination_ordering, treewidth_upper_bound)
+}
+
+#[cfg(test)]
+mod tests {
+    use petgraph::Graph;
+
+    use crate::greedy_degree_fill_in_heuristic;
+
+    #[test]
+    fn test_heuristic_on_k_tree() {
+        use rand::Rng;
+        use treewidth_heuristic_clique_graph::generate_k_tree;
+
+        for _ in 0..25 {
+            let mut rng = rand::thread_rng();
+
+            let n = 108;
+            let k = 28;
+
+            // let k: usize = (rng.gen::<f32>() * 50.0) as usize;
+            // // n should be strictly greater than k otherwise k_tree has not guaranteed treewidth k
+            // let n: usize = (rng.gen::<f32>() * 100.0) as usize + k + 1;
+
+            let k_tree: Graph<i32, i32, petgraph::prelude::Undirected> =
+                generate_k_tree(k, n).expect("k should be smaller or eq to n");
+
+            let result = greedy_degree_fill_in_heuristic(&k_tree);
+
+            assert_eq!(k, result, "k_tree with n: {} and k: {}", n, k);
+        }
+    }
 }
