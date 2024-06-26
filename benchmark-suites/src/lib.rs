@@ -40,7 +40,7 @@ use csv::Writer;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 5] = [
     (comparison_of_edge_weights, "comparison_of_edge_weights"),
     (
         comparison_of_combined_edge_weights,
@@ -49,6 +49,10 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
     (
         comparison_with_greedy_degree_fill_in,
         "comparison_with_greedy_degree_fill_in",
+    ),
+    (
+        comparison_runtime_mst_and_fill_while,
+        "comparison_runtime_mst_and_fill_while",
     ),
     (
         comparison_of_spanning_tree_construction,
@@ -70,6 +74,10 @@ pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
 
 pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicTypes> {
     vec![FilWhINiTLd, GreedyDegreeFillIn]
+}
+
+pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicTypes> {
+    vec![FilWhINiTLd, MSTreINiTLd]
 }
 
 impl std::fmt::Display for HeuristicTypes {
