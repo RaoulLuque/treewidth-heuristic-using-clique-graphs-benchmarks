@@ -40,7 +40,10 @@ use csv::Writer;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 5] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
+    // DEBUG
+    (test_if_fill_while_works, "test_if_fill_while_works"),
+    // Actual Tests
     (comparison_of_edge_weights, "comparison_of_edge_weights"),
     (
         comparison_of_combined_edge_weights,
@@ -59,6 +62,10 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 5] = [
         "comparison_of_spanning_tree_construction",
     ),
 ];
+
+pub fn test_if_fill_while_works() -> Vec<HeuristicTypes> {
+    vec![FilWhINiTLd, MSTreINegIn, MSTreINiTLd]
+}
 
 pub fn comparison_of_edge_weights() -> Vec<HeuristicTypes> {
     vec![MSTreILeDif, MSTreINegIn, MSTreIUnion, MSTreIDisjU]
@@ -117,10 +124,10 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
 >(
     heuristic: &HeuristicTypes,
 ) -> Option<(
-    treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod,
+    treewidth_heuristic_using_clique_graphs::SpanningTreeConstructionMethod,
     EdgeWeightTypes<S>,
 )> {
-    use treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod::*;
+    use treewidth_heuristic_using_clique_graphs::SpanningTreeConstructionMethod::*;
     use treewidth_heuristic_using_clique_graphs::*;
     use EdgeWeightTypes::*;
     match heuristic {
@@ -177,7 +184,7 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
 // DEBUG
 // pub fn heuristic_to_computation_type(
 //     heuristic: &HeuristicTypes,
-// ) -> treewidth_heuristic_using_clique_graphs::TreewidthComputationMethod {
+// ) -> treewidth_heuristic_using_clique_graphs::SpanningTreeConstructionMethod {
 //     match heuristic {
 //         MSTreIUnion => MSTAndUseTreeStructure,
 //         MSTreIDisjU => MSTAndUseTreeStructure,

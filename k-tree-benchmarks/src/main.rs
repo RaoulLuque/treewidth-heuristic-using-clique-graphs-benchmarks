@@ -13,6 +13,10 @@ use benchmark_suites::*;
 use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
 use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_connected;
 
+// DEBUG
+// const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 1;
+// const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 1;
+
 const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
 const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
 
@@ -25,31 +29,31 @@ type Hasher = std::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 type Hasher = std::hash::RandomState;
 
 /// First coordinate is the n, second k, third p
-pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 24] = [
+pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 12] = [
     (100, 10, 30),
     (100, 10, 40),
     (100, 10, 50),
-    (100, 20, 30),
-    (100, 20, 40),
-    (100, 20, 50),
+    // (100, 20, 30),
+    // (100, 20, 40),
+    // (100, 20, 50),
     (200, 10, 30),
     (200, 10, 40),
     (200, 10, 50),
-    (200, 20, 30),
-    (200, 20, 40),
-    (200, 20, 50),
+    // (200, 20, 30),
+    // (200, 20, 40),
+    // (200, 20, 50),
     (500, 10, 30),
     (500, 10, 40),
     (500, 10, 50),
-    (500, 20, 30),
-    (500, 20, 40),
-    (500, 20, 50),
+    // (500, 20, 30),
+    // (500, 20, 40),
+    // (500, 20, 50),
     (1000, 10, 30),
     (1000, 10, 40),
     (1000, 10, 50),
-    (1000, 20, 30),
-    (1000, 20, 40),
-    (1000, 20, 50),
+    // (1000, 20, 30),
+    // (1000, 20, 40),
+    // (1000, 20, 50),
 ];
 
 // pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 30] = [
@@ -168,7 +172,7 @@ fn main() {
                 per_run_runtime_data_multidimensional.push(Vec::new());
             }
 
-            for _ in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+            for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
                 let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
                 treewidth_heuristic_using_clique_graphs::generate_partial_k_tree_with_guaranteed_treewidth(
                     k,
@@ -187,7 +191,13 @@ fn main() {
                         );
                     let clique_bound = heuristic_to_clique_bound(heuristic);
 
-                    for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                    for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                        println!(
+                            "{} Starting calculation for tree number: {}, heuristic {:?} and {}-th graph",
+                            Local::now().to_utc().time().format("%H:%M:%S"),
+                            i, heuristic, j
+                        );
+
                         // Time the calculation
                         let start = SystemTime::now();
 
