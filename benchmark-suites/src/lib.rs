@@ -90,22 +90,22 @@ pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicTypes> {
 impl std::fmt::Display for HeuristicTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let display_string = match self {
-            MSTreIUnion => "MTrUn".to_string(),
-            MSTreIDisjU => "MTrDU".to_string(),
-            MSTreINegIn => "MTrNi".to_string(),
-            FilWhINegIn => "FiWhNi".to_string(),
-            MSTreILeDif => "MTrLd".to_string(),
-            FilWhILeDif => "FiWhLd".to_string(),
-            MSTreINiTLd => "MTrNiTLd".to_string(),
-            FilWhINiTLd => "FiWhNiTLd".to_string(),
-            FWhUEINiTLd => "FWUNiTLd".to_string(),
-            MSTreILdTNi => "MTrLdTNi".to_string(),
-            FilWhILdTNi => "FiWhLdTNi".to_string(),
-            FiWhTINiTLd => "FWTNiTLd".to_string(),
-            FWBagINonee => "FWB".to_string(),
-            MSTreINiTLdIBC(clique_bound) => format!("MTrNiTLdBC {}", clique_bound),
-            FilWhINiTLdIBC(clique_bound) => format!("FiWhLdTNiBC {}", clique_bound),
-            FiWhTINiTLdIBC(clique_bound) => format!("FWTNiTLd {}", clique_bound),
+            MSTreIUnion => "MSTreIUnion".to_string(),
+            MSTreIDisjU => "MSTreIDisjU".to_string(),
+            MSTreINegIn => "MSTreINegIn".to_string(),
+            FilWhINegIn => "FilWhINegIn".to_string(),
+            MSTreILeDif => "MSTreILeDif".to_string(),
+            FilWhILeDif => "FilWhILeDif".to_string(),
+            MSTreINiTLd => "MSTreINiTLd".to_string(),
+            FilWhINiTLd => "FilWhINiTLd".to_string(),
+            FWhUEINiTLd => "FWhUEINiTLd".to_string(),
+            MSTreILdTNi => "MSTreILdTNi".to_string(),
+            FilWhILdTNi => "FilWhILdTNi".to_string(),
+            FiWhTINiTLd => "FiWhTINiTLd".to_string(),
+            FWBagINonee => "FWBagINonee".to_string(),
+            MSTreINiTLdIBC(clique_bound) => format!("MSTreINiTLdIBC {}", clique_bound),
+            FilWhINiTLdIBC(clique_bound) => format!("FilWhINiTLdIBC {}", clique_bound),
+            FiWhTINiTLdIBC(clique_bound) => format!("FiWhTINiTLdIBC {}", clique_bound),
             GreedyDegreeFillIn => format!("GreedyDegreeFillIn"),
         };
         write!(f, "{}", display_string)
@@ -302,57 +302,92 @@ pub fn write_to_csv(
         let mut offset_counter = 1;
         let mut average_runtime: f64 = 0.0;
         let mut average_bound: f64 = f64::MAX;
-
-        for i in 0..per_run_bound_data.len() {
-            if i == 0 || i == 1 {
-                average_bound_header.push(
-                    per_run_bound_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .to_owned(),
-                );
-                average_runtime_header.push(
-                    per_run_runtime_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .to_owned(),
-                );
-            } else {
-                if offset_counter == number_of_runs_per_graph {
-                    average_runtime /= number_of_runs_per_graph as f64;
-
-                    average_bound_data.push(average_bound);
-                    average_runtime_data.push(average_runtime);
-                    average_bound = per_run_bound_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .parse::<f64>()
-                        .expect("Entries of data vectors should be valid f64");
-                    average_runtime = per_run_runtime_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .parse::<f64>()
-                        .expect("Entries of data vectors should be valid f64");
-
-                    offset_counter = 1;
-                } else {
-                    average_bound = average_bound.min(
+        if number_of_runs_per_graph != 1 {
+            for i in 0..per_run_bound_data.len() {
+                if i == 0 || i == 1 {
+                    average_bound_header.push(
                         per_run_bound_data
                             .get(i)
                             .expect("Index should be in bound by loop invariant")
-                            .parse::<f64>()
-                            .expect("Entries of data vectors should be valid f64"),
+                            .to_owned(),
                     );
-                    average_runtime += per_run_runtime_data
-                        .get(i)
-                        .expect("Index should be in bound by loop invariant")
-                        .parse::<f64>()
-                        .expect("Entries of data vectors should be valid f64");
-                    offset_counter += 1;
-                    if i == per_run_bound_data.len() - 1 {
+                    average_runtime_header.push(
+                        per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned(),
+                    );
+                } else {
+                    if offset_counter == number_of_runs_per_graph {
+                        average_runtime /= number_of_runs_per_graph as f64;
+
                         average_bound_data.push(average_bound);
                         average_runtime_data.push(average_runtime);
+                        average_bound = per_run_bound_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .parse::<f64>()
+                            .expect("Entries of data vectors should be valid f64");
+                        average_runtime = per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .parse::<f64>()
+                            .expect("Entries of data vectors should be valid f64");
+
+                        offset_counter = 1;
+                    } else {
+                        average_bound = average_bound.min(
+                            per_run_bound_data
+                                .get(i)
+                                .expect("Index should be in bound by loop invariant")
+                                .parse::<f64>()
+                                .expect("Entries of data vectors should be valid f64"),
+                        );
+                        average_runtime += per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .parse::<f64>()
+                            .expect("Entries of data vectors should be valid f64");
+                        offset_counter += 1;
+                        if i == per_run_bound_data.len() - 1 {
+                            average_bound_data.push(average_bound);
+                            average_runtime_data.push(average_runtime);
+                        }
                     }
+                }
+            }
+        } else {
+            for i in 0..per_run_bound_data.len() {
+                if i == 0 || i == 1 {
+                    average_bound_header.push(
+                        per_run_bound_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned(),
+                    );
+                    average_runtime_header.push(
+                        per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned(),
+                    );
+                } else {
+                    average_bound_data.push(
+                        per_run_bound_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned()
+                            .parse::<f64>()
+                            .expect("Entry should be valid f64"),
+                    );
+                    average_runtime_data.push(
+                        per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .to_owned()
+                            .parse::<f64>()
+                            .expect("Entry should be valid f64"),
+                    );
                 }
             }
         }

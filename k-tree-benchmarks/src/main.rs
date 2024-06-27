@@ -106,81 +106,6 @@ fn main() {
     }
 }
 
-// Converting dot files to pdf in bulk:
-// FullPath -type f -name "*.dot" | xargs dot -Tpdf -O
-#[allow(dead_code)]
-fn create_dot_files<O: Debug, S>(
-    graph: &Graph<i32, i32, petgraph::prelude::Undirected>,
-    clique_graph: &Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
-    clique_graph_tree_after_filling_up: &Graph<
-        HashSet<NodeIndex, S>,
-        O,
-        petgraph::prelude::Undirected,
-    >,
-    clique_graph_tree_before_filling_up: &Option<
-        Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
-    >,
-    i: usize,
-    name: &str,
-) {
-    fs::create_dir_all("k_tree_benchmarks/benchmark_results/visualizations")
-        .expect("Could not create directory for visualizations");
-
-    let start_graph_dot_file = Dot::with_config(graph, &[Config::EdgeNoLabel]);
-    let result_graph_dot_file =
-        Dot::with_config(clique_graph_tree_after_filling_up, &[Config::EdgeNoLabel]);
-    let clique_graph_dot_file = Dot::with_config(&clique_graph, &[Config::EdgeNoLabel]);
-
-    if let Some(clique_graph_tree_before_filling_up) = clique_graph_tree_before_filling_up {
-        let clique_graph_tree_before_filling_up_dot_file =
-            Dot::with_config(clique_graph_tree_before_filling_up, &[Config::EdgeNoLabel]);
-        let clique_graph_node_indices = Dot::with_config(
-            clique_graph_tree_before_filling_up,
-            &[Config::EdgeNoLabel, Config::NodeIndexLabel],
-        );
-
-        let mut w = fs::File::create(format!(
-            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_before_filling_{}.dot",
-            i, name
-        ))
-        .expect("Result graph without filling up file could not be created");
-        write!(&mut w, "{:?}", clique_graph_tree_before_filling_up_dot_file)
-            .expect("Unable to write dotfile for result graph without filling up to files");
-
-        let mut w = fs::File::create(format!(
-            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_node_indices_{}.dot",
-            i, name
-        ))
-        .expect("Clique graph node indices file could not be created");
-        write!(&mut w, "{:?}", clique_graph_node_indices)
-            .expect("Unable to write dotfile for Clique graph node indices  to files");
-    }
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_starting_graph_{}.dot",
-        i, name
-    ))
-    .expect("Start graph file could not be created");
-    write!(&mut w, "{:?}", start_graph_dot_file)
-        .expect("Unable to write dotfile for start graph to files");
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_clique_graph_{}.dot",
-        i, name
-    ))
-    .expect("Start graph file could not be created");
-    write!(&mut w, "{:?}", clique_graph_dot_file)
-        .expect("Unable to write dotfile for start graph to files");
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_{}.dot",
-        i, name
-    ))
-    .expect("Result graph file could not be created");
-    write!(&mut w, "{:?}", result_graph_dot_file)
-        .expect("Unable to write dotfile for result graph to files");
-}
-
 fn single_thread_benchmark() {
     let date_and_time = Local::now()
         .to_utc()
@@ -576,4 +501,79 @@ fn multithread_benchmark() {
             .expect("Writing to csv should be possible");
         }
     }
+}
+
+// Converting dot files to pdf in bulk:
+// FullPath -type f -name "*.dot" | xargs dot -Tpdf -O
+#[allow(dead_code)]
+fn create_dot_files<O: Debug, S>(
+    graph: &Graph<i32, i32, petgraph::prelude::Undirected>,
+    clique_graph: &Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
+    clique_graph_tree_after_filling_up: &Graph<
+        HashSet<NodeIndex, S>,
+        O,
+        petgraph::prelude::Undirected,
+    >,
+    clique_graph_tree_before_filling_up: &Option<
+        Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
+    >,
+    i: usize,
+    name: &str,
+) {
+    fs::create_dir_all("k_tree_benchmarks/benchmark_results/visualizations")
+        .expect("Could not create directory for visualizations");
+
+    let start_graph_dot_file = Dot::with_config(graph, &[Config::EdgeNoLabel]);
+    let result_graph_dot_file =
+        Dot::with_config(clique_graph_tree_after_filling_up, &[Config::EdgeNoLabel]);
+    let clique_graph_dot_file = Dot::with_config(&clique_graph, &[Config::EdgeNoLabel]);
+
+    if let Some(clique_graph_tree_before_filling_up) = clique_graph_tree_before_filling_up {
+        let clique_graph_tree_before_filling_up_dot_file =
+            Dot::with_config(clique_graph_tree_before_filling_up, &[Config::EdgeNoLabel]);
+        let clique_graph_node_indices = Dot::with_config(
+            clique_graph_tree_before_filling_up,
+            &[Config::EdgeNoLabel, Config::NodeIndexLabel],
+        );
+
+        let mut w = fs::File::create(format!(
+            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_before_filling_{}.dot",
+            i, name
+        ))
+        .expect("Result graph without filling up file could not be created");
+        write!(&mut w, "{:?}", clique_graph_tree_before_filling_up_dot_file)
+            .expect("Unable to write dotfile for result graph without filling up to files");
+
+        let mut w = fs::File::create(format!(
+            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_node_indices_{}.dot",
+            i, name
+        ))
+        .expect("Clique graph node indices file could not be created");
+        write!(&mut w, "{:?}", clique_graph_node_indices)
+            .expect("Unable to write dotfile for Clique graph node indices  to files");
+    }
+
+    let mut w = fs::File::create(format!(
+        "k_tree_benchmarks/benchmark_results/visualizations/{}_starting_graph_{}.dot",
+        i, name
+    ))
+    .expect("Start graph file could not be created");
+    write!(&mut w, "{:?}", start_graph_dot_file)
+        .expect("Unable to write dotfile for start graph to files");
+
+    let mut w = fs::File::create(format!(
+        "k_tree_benchmarks/benchmark_results/visualizations/{}_clique_graph_{}.dot",
+        i, name
+    ))
+    .expect("Start graph file could not be created");
+    write!(&mut w, "{:?}", clique_graph_dot_file)
+        .expect("Unable to write dotfile for start graph to files");
+
+    let mut w = fs::File::create(format!(
+        "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_{}.dot",
+        i, name
+    ))
+    .expect("Result graph file could not be created");
+    write!(&mut w, "{:?}", result_graph_dot_file)
+        .expect("Unable to write dotfile for result graph to files");
 }
