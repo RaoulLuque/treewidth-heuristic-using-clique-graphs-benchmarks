@@ -17,3 +17,5 @@ chrono = "0.4.38"
 csv = "1.3.0"
 benchmark-suites = { path = "../benchmark-suites"}
 greedy-degree-fill-in-heuristic = { path = "../greedy-degree-fill-in-heuristic"}
+env_logger = "0.11.3"
+log = "0.4.21"

@@ -333,7 +333,9 @@ dependencies = [
  "benchmark-suites",
  "chrono",
  "csv",
+ "env_logger",
  "greedy-degree-fill-in-heuristic",
+ "log",
  "petgraph",
  "rand",
  "rustc-hash",
@@ -514,6 +516,7 @@ name = "treewidth-heuristic-using-clique-graphs"
 version = "0.1.0"
 dependencies = [
  "itertools 0.13.0",
+ "log",
  "petgraph",
  "rand",
  "rustc-hash",
