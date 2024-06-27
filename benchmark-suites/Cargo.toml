@@ -11,3 +11,4 @@ repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-ben
 treewidth-heuristic-using-clique-graphs = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-using-clique-graphs"}
 petgraph = "0.6.4"
 csv = "1.3.0"
+log = "0.4.21"

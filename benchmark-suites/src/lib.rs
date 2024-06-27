@@ -37,17 +37,20 @@ pub enum HeuristicTypes {
 }
 
 use csv::Writer;
+use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
-    // DEBUG
-    (test_if_fill_while_works, "test_if_fill_while_works"),
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 5] = [
     // Actual Tests
     (comparison_of_edge_weights, "comparison_of_edge_weights"),
     (
         comparison_of_combined_edge_weights,
         "comparison_of_combined_edge_weights",
+    ),
+    (
+        comparison_of_spanning_tree_construction,
+        "comparison_of_spanning_tree_construction",
     ),
     (
         comparison_with_greedy_degree_fill_in,
@@ -56,10 +59,6 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
     (
         comparison_runtime_mst_and_fill_while,
         "comparison_runtime_mst_and_fill_while",
-    ),
-    (
-        comparison_of_spanning_tree_construction,
-        "comparison_of_spanning_tree_construction",
     ),
 ];
 
@@ -76,7 +75,11 @@ pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicTypes> {
 }
 
 pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
-    vec![MSTreINiTLd, FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
+    vec![MSTreINegIn, MSTreINiTLd, FilWhINegIn, FilWhINiTLd]
+}
+
+pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicTypes> {
+    vec![FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
 }
 
 pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicTypes> {
@@ -181,31 +184,6 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     }
 }
 
-// DEBUG
-// pub fn heuristic_to_computation_type(
-//     heuristic: &HeuristicTypes,
-// ) -> treewidth_heuristic_using_clique_graphs::SpanningTreeConstructionMethod {
-//     match heuristic {
-//         MSTreIUnion => MSTAndUseTreeStructure,
-//         MSTreIDisjU => MSTAndUseTreeStructure,
-//         MSTreINegIn => MSTAndUseTreeStructure,
-//         FilWhINegIn => FillWhilstMST,
-//         MSTreILeDif => MSTAndUseTreeStructure,
-//         FilWhILeDif => FillWhilstMST,
-//         MSTreILdTNi => MSTAndUseTreeStructure,
-//         FilWhILdTNi => FillWhilstMST,
-//         MSTreINiTLd => MSTAndUseTreeStructure,
-//         FilWhINiTLd => FillWhilstMST,
-//         FWhUEINiTLd => FillWhilstMSTEdgeUpdate,
-//         FiWhTINiTLd => FillWhilstMSTTree,
-//         FWBagINonee => FillWhilstMSTBagSize,
-//         MSTreINiTLdIBC(_) => MSTAndUseTreeStructure,
-//         FilWhINiTLdIBC(_) => FillWhilstMST,
-//         FiWhTINiTLdIBC(_) => FillWhilstMSTTree,
-//         GreedyDegreeFillIn => None,
-//     }
-// }
-
 pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
     match heuristic {
         MSTreIUnion => None,
@@ -248,7 +226,7 @@ pub fn write_to_csv(
         let mut average_runtime_data: Vec<_> = Vec::new();
         let mut offset_counter = 1;
 
-        println!(
+        debug!(
             "Per Run Bound Data Header length: {:?}",
             per_run_bound_data.len()
         );
@@ -287,8 +265,8 @@ pub fn write_to_csv(
                 }
             }
         }
-        println!("Writing to writers");
-        println!("Trying to write: {:?}", average_bound_data);
+        debug!("Writing to writers");
+        debug!("Trying to write: {:?}", average_bound_data);
         per_run_bound_writer.write_record(per_run_bound_data)?;
         per_run_runtime_writer.write_record(per_run_runtime_data)?;
 
