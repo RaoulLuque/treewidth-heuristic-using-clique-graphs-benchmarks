@@ -19,8 +19,8 @@ use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_c
 // const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 1;
 // const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 1;
 
-const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 2;
-const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 2;
+const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
+const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
 
 // Debug version
 #[cfg(debug_assertions)]
