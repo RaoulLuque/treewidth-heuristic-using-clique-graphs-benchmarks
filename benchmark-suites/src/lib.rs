@@ -36,6 +36,7 @@ pub enum HeuristicTypes {
     FiWhTINiTLdIBC(usize),
 }
 
+use chrono::TimeZone;
 use csv::Writer;
 use log::debug;
 use petgraph::graph::NodeIndex;
@@ -391,4 +392,12 @@ pub fn write_to_csv(
     average_runtime_writer.flush()?;
 
     Ok(())
+}
+
+pub fn current_time() -> String {
+    let tz_offset = chrono::FixedOffset::east_opt(2 * 3600).unwrap();
+    chrono::Local::from_offset(&tz_offset)
+        .from_utc_datetime(&chrono::Local::now().to_utc().naive_utc())
+        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
+        .to_string()
 }

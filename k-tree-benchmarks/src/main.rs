@@ -107,10 +107,7 @@ fn main() {
 }
 
 fn single_thread_benchmark() {
-    let date_and_time = Local::now()
-        .to_utc()
-        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
-        .to_string();
+    let date_and_time = current_time();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
         debug!("Starting new part of test_suite: {}", benchmark_name);
@@ -291,10 +288,7 @@ fn single_thread_benchmark() {
 fn multithread_benchmark() {
     println!("Multithreading");
 
-    let date_and_time = Local::now()
-        .to_utc()
-        .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
-        .to_string();
+    let date_and_time = current_time();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
         debug!("Starting new part of test_suite: {}", benchmark_name);
