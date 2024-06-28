@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use petgraph::{graph::NodeIndex, Graph, Undirected};
+use petgraph::{graph::NodeIndex, stable_graph::StableGraph, Graph, Undirected};
 use std::collections::HashSet;
 
 /// Greedy heuristic for computing an upper bound on the treewidth as described in
@@ -18,7 +18,7 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
     let mut elimination_ordering: Vec<_> = Vec::with_capacity(graph.node_count());
     let mut treewidth_upper_bound: usize = 0;
     let mut number_of_iterations = 0;
-    let mut graph_copy = graph.clone();
+    let mut graph_copy: StableGraph<N, E, Undirected> = graph.clone().into();
     let mut remaining_vertices: HashSet<NodeIndex> = graph.node_indices().collect();
 
     while !remaining_vertices.is_empty() {
@@ -42,10 +42,31 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
                     }
                 }
                 number_of_edges_that_would_have_to_be_added
-                    + graph_copy.neighbors(**v).collect_vec().len()
+                // + graph_copy.neighbors(**v).collect_vec().len()
             })
             .expect("remaining vertices shouldn't be empty by loop invariant")
             .clone();
+
+        let mut number_of_edges_that_would_have_to_be_added = 0;
+        for tuple in graph_copy.neighbors(current_vertex).combinations(2) {
+            let (x, y) = (
+                tuple
+                    .get(0)
+                    .expect("Tuple should contain exactly two elements"),
+                tuple
+                    .get(1)
+                    .expect("Tuple should contain exactly two elements"),
+            );
+            if !graph_copy.contains_edge(*x, *y) {
+                number_of_edges_that_would_have_to_be_added += 1;
+            }
+        }
+        if number_of_edges_that_would_have_to_be_added != 0 {
+            println!(
+                "No simplicial vertex found in step: {}",
+                number_of_iterations
+            );
+        }
 
         let mut edges_to_be_added: HashSet<_> = HashSet::new();
         for tuple in graph_copy.neighbors(current_vertex).combinations(2) {
@@ -75,6 +96,7 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
 
         elimination_ordering.insert(number_of_iterations, current_vertex);
         number_of_iterations += 1;
+        graph_copy.remove_node(current_vertex);
         remaining_vertices.remove(&current_vertex);
     }
 
@@ -88,11 +110,13 @@ mod tests {
     use crate::greedy_degree_fill_in_heuristic;
 
     #[test]
-    fn test_heuristic_on_k_tree() {
+    fn test_greedy_degree_fill_in_on_k_tree() {
         use rand::Rng;
         use treewidth_heuristic_using_clique_graphs::generate_k_tree;
+        let mut thread_vec = Vec::new();
 
         for _ in 0..25 {
+            thread_vec.push(std::thread::spawn(|| {
             let mut rng = rand::thread_rng();
 
             let k: usize = (rng.gen::<f32>() * 50.0) as usize;
@@ -101,10 +125,18 @@ mod tests {
 
             let k_tree: Graph<i32, i32, petgraph::prelude::Undirected> =
                 generate_k_tree(k, n).expect("k should be smaller or eq to n");
-
             let result = greedy_degree_fill_in_heuristic(&k_tree);
 
-            assert_eq!(k, result, "k_tree with n: {} and k: {}", n, k);
+            assert_eq!(
+                k, result,
+                "k_tree with n: {} and k: {} and graph: {:?}",
+                n, k, k_tree
+            );
+            }));
+        }
+
+        for thread_handle in thread_vec {
+            thread_handle.join().unwrap();
         }
     }
 }
