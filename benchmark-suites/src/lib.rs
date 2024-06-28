@@ -11,6 +11,8 @@ pub enum HeuristicTypes {
     MSTreINegIn,
     MSTreIUnion,
     MSTreIDisjU,
+    MSTreIConst,
+    MSTreIRandd,
 
     // For comparison of combined edge weights:
     MSTreINiTLd,
@@ -42,7 +44,8 @@ use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 5] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
+    (test_test_suite, "z_test_test_suite"),
     // Actual Tests
     (comparison_of_edge_weights, "comparison_of_edge_weights"),
     (
@@ -67,8 +70,19 @@ pub fn test_if_fill_while_works() -> Vec<HeuristicTypes> {
     vec![FilWhINiTLd, MSTreINegIn, MSTreINiTLd]
 }
 
+pub fn test_test_suite() -> Vec<HeuristicTypes> {
+    vec![MSTreINegIn, MSTreIConst]
+}
+
 pub fn comparison_of_edge_weights() -> Vec<HeuristicTypes> {
-    vec![MSTreILeDif, MSTreINegIn, MSTreIUnion, MSTreIDisjU]
+    vec![
+        MSTreILeDif,
+        MSTreINegIn,
+        MSTreIUnion,
+        MSTreIDisjU,
+        MSTreIConst,
+        MSTreIRandd,
+    ]
 }
 
 pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicTypes> {
@@ -111,6 +125,8 @@ impl std::fmt::Display for HeuristicTypes {
             FilWhINiTLdIBC(clique_bound) => format!("FilWhINiTLdIBC {}", clique_bound),
             FiWhTINiTLdIBC(clique_bound) => format!("FiWhTINiTLdIBC {}", clique_bound),
             GreedyDegreeFillIn => format!("GreedyDegreeFillIn"),
+            MSTreIConst => "MSTreIConst".to_string(),
+            MSTreIRandd => "MSTreIRandd".to_string(),
         };
         write!(f, "{}", display_string)
     }
@@ -182,6 +198,8 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         GreedyDegreeFillIn => None,
+        MSTreIConst => Some((MSTAndUseTreeStructure, ReturnI32(constant))),
+        MSTreIRandd => Some((MSTAndUseTreeStructure, ReturnI32(random))),
     }
 }
 
@@ -204,6 +222,8 @@ pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
         FilWhINiTLdIBC(clique_bound) => Some(*clique_bound),
         FiWhTINiTLdIBC(clique_bound) => Some(*clique_bound),
         GreedyDegreeFillIn => None,
+        MSTreIConst => None,
+        MSTreIRandd => None,
     }
 }
 
@@ -298,21 +318,27 @@ pub fn write_to_csv(
                     );
                 } else {
                     if offset_counter == number_of_runs_per_graph {
+                        average_bound = average_bound.min(
+                            per_run_bound_data
+                                .get(i)
+                                .expect("Index should be in bound by loop invariant")
+                                .parse::<f64>()
+                                .expect("Entries of data vectors should be valid f64"),
+                        );
+                        average_runtime += per_run_runtime_data
+                            .get(i)
+                            .expect("Index should be in bound by loop invariant")
+                            .parse::<f64>()
+                            .expect("Entries of data vectors should be valid f64");
+
                         average_runtime /= number_of_runs_per_graph as f64;
 
                         average_bound_data.push(average_bound);
                         average_runtime_data.push(average_runtime);
-                        average_bound = per_run_bound_data
-                            .get(i)
-                            .expect("Index should be in bound by loop invariant")
-                            .parse::<f64>()
-                            .expect("Entries of data vectors should be valid f64");
-                        average_runtime = per_run_runtime_data
-                            .get(i)
-                            .expect("Index should be in bound by loop invariant")
-                            .parse::<f64>()
-                            .expect("Entries of data vectors should be valid f64");
 
+                        // Reset average bound and runtime and counter
+                        average_bound = f64::MAX;
+                        average_runtime = 0.0;
                         offset_counter = 1;
                     } else {
                         average_bound = average_bound.min(
@@ -328,10 +354,10 @@ pub fn write_to_csv(
                             .parse::<f64>()
                             .expect("Entries of data vectors should be valid f64");
                         offset_counter += 1;
-                        if i == per_run_bound_data.len() - 1 {
-                            average_bound_data.push(average_bound);
-                            average_runtime_data.push(average_runtime);
-                        }
+                        // if i == per_run_bound_data.len() - 1 {
+                        //     average_bound_data.push(average_bound);
+                        //     average_runtime_data.push(average_runtime);
+                        // }
                     }
                 }
             }
