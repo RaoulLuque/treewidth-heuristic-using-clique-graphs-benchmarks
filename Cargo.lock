@@ -197,6 +197,7 @@ dependencies = [
  "dimacs_petgraph_parser",
  "env_logger",
  "greedy-degree-fill-in-heuristic",
+ "log",
  "petgraph",
  "rustc-hash",
  "serde",

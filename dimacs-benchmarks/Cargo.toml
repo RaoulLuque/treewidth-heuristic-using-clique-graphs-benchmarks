@@ -18,3 +18,4 @@ env_logger = "0.11.3"
 rustc-hash = { git = "https://github.com/rust-lang/rustc-hash"}
 chrono = "0.4.38"
 csv = "1.3.0"
+log = "0.4.21"
