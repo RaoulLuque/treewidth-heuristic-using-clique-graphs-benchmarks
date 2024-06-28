@@ -19,3 +19,4 @@ benchmark-suites = { path = "../benchmark-suites"}
 greedy-degree-fill-in-heuristic = { path = "../greedy-degree-fill-in-heuristic"}
 env_logger = "0.11.3"
 log = "0.4.21"
+tokio = "1.38.0"

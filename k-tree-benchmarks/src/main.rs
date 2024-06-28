@@ -19,8 +19,8 @@ use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_c
 // const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 1;
 // const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 1;
 
-const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
-const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
+const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 2;
+const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 2;
 
 // Debug version
 #[cfg(debug_assertions)]
@@ -110,7 +110,7 @@ fn single_thread_benchmark() {
     let date_and_time = current_time();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
-        debug!("Starting new part of test_suite: {}", benchmark_name);
+        info!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
         // Creating writers
@@ -291,7 +291,7 @@ fn multithread_benchmark() {
     let date_and_time = current_time();
 
     for (heuristic_variants, benchmark_name) in TEST_SUITE {
-        debug!("Starting new part of test_suite: {}", benchmark_name);
+        info!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
         // Creating writers
@@ -353,8 +353,6 @@ fn multithread_benchmark() {
         let mut thread_vec = Vec::new();
 
         for thread_index in 0..PARTIAL_K_TREE_CONFIGURATIONS.len() {
-            let heuristics_variants_being_tested = heuristics_variants_being_tested.to_vec();
-
             thread_vec.push(thread::spawn(move || {
                 debug!("Thread {} starting", thread_index);
                 let (n,k,p) = PARTIAL_K_TREE_CONFIGURATIONS[thread_index];
@@ -364,17 +362,21 @@ fn multithread_benchmark() {
                     Local::now().to_utc().time().format("%H:%M:%S"),
                     (n, k, p)
                 );
+                let heuristics_variants_being_tested = heuristic_variants();
 
-                // Vec with vecs for each heuristic variant storing all results in successive order to merge together afterwards
                 let mut per_run_bound_data_multidimensional = Vec::new();
                 let mut per_run_runtime_data_multidimensional = Vec::new();
 
-                for _ in heuristics_variants_being_tested.iter() {
+                for _ in 0..heuristics_variants_being_tested.len() {
                     per_run_bound_data_multidimensional.push(Vec::new());
                     per_run_runtime_data_multidimensional.push(Vec::new());
                 }
 
-                for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+                // let mut thread_vec_number_of_trees = Vec::new();
+
+                for i_th_tree in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+
+                    // thread_vec_number_of_trees.push(thread::spawn(move || {
                     let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
                     treewidth_heuristic_using_clique_graphs::generate_partial_k_tree_with_guaranteed_treewidth(
                         k,
@@ -384,22 +386,37 @@ fn multithread_benchmark() {
                     )
                     .expect("n should be greater than k");
 
+
+
+                    let mut heuristic_variant_thread_vec = Vec::new();
+                    let heuristics_variants_being_tested = heuristic_variants();
+
                     for (heuristic_number, heuristic) in
                         heuristics_variants_being_tested.iter().enumerate()
                     {
-                        let computation_method =
-                            heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic(
-                                heuristic,
-                            );
+                        
                         let clique_bound = heuristic_to_clique_bound(heuristic);
+                        let graph = graph.clone();
+                        
+                        let heuristic: HeuristicTypes = heuristic.to_owned();
 
+                        heuristic_variant_thread_vec.push(thread::spawn(move || {
+
+                        let mut graph_repetition_thread_vec = Vec::new();
                         for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
                             debug!(
                                 "Thread {} (n, k, p) = {:?}: {} Starting calculation for tree number: {}, heuristic {:?} and {}-th graph",
                                 thread_index, (n,k,p),
                                 Local::now().to_utc().time().format("%H:%M:%S"),
-                                i, heuristic, j
+                                i_th_tree, heuristic, j
                             );
+                            let graph = graph.clone();
+
+                            graph_repetition_thread_vec.push(thread::spawn(move || {
+                                let computation_method =
+                                heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic(
+                                    &heuristic,
+                                );
 
                             // Time the calculation
                             let start = SystemTime::now();
@@ -425,23 +442,93 @@ fn multithread_benchmark() {
                                 }
                                 None => greedy_degree_fill_in_heuristic(&graph),
                             };
-                            per_run_bound_data_multidimensional
-                                .get_mut(heuristic_number)
-                                .expect("Index should be in bound by loop invariant")
-                                .push(computed_treewidth.to_string());
-                            per_run_runtime_data_multidimensional
-                                .get_mut(heuristic_number)
-                                .expect("Index should be in bound by loop invariant")
-                                .push(
-                                    start
-                                        .elapsed()
-                                        .expect("Time should be trackable")
-                                        .as_millis()
-                                        .to_string(),
-                                );
+                            (computed_treewidth, start
+                                .elapsed()
+                                .expect("Time should be trackable")
+                                .as_millis()
+                                .to_string())
+                            }));
+                            // per_run_bound_data_multidimensional
+                            //     .get_mut(heuristic_number)
+                            //     .expect("Index should be in bound by loop invariant")
+                            //     .push(computed_treewidth.to_string());
+                            // per_run_runtime_data_multidimensional
+                            //     .get_mut(heuristic_number)
+                            //     .expect("Index should be in bound by loop invariant")
+                            //     .push(
+                            //         start
+                                // .elapsed()
+                                // .expect("Time should be trackable")
+                                // .as_millis()
+                                // .to_string()),
+                            //     );
                         }
+                        let mut results_from_graph_repetitions = Vec::new();
+                        for thread_handle in graph_repetition_thread_vec {
+                            results_from_graph_repetitions.push(thread_handle.join());
+                        }
+                        let results_from_graph_repetitions: Vec<_> = results_from_graph_repetitions
+                        .iter_mut()
+                        .map(|thread_results| {
+                            thread_results
+                                .as_mut()
+                                .expect("Threads should return results")
+                        })
+                        .collect();
+
+                        let (graph_repetition_bound_result, graph_repetition_runtime_result): (Vec<_>, Vec<_>) = results_from_graph_repetitions.into_iter().map(|(a, b)| (a.to_string(), b.to_owned())).unzip();
+
+                        // These are the results of one heuristic on one graph (NUMBER_OF_REPETITIONS_PER_GRAPH number of runs)
+                        (heuristic_number, graph_repetition_bound_result, graph_repetition_runtime_result)
+                        }));
+                    }
+                    let mut results_from_each_heuristic_variant = Vec::new();
+                    for thread_handle in heuristic_variant_thread_vec {
+                        results_from_each_heuristic_variant.push(thread_handle.join());
+                    }
+                    let results_from_each_heuristic_variant: Vec<_> = results_from_each_heuristic_variant
+                        .iter_mut()
+                        .map(|thread_results| {
+                            thread_results
+                                .as_mut()
+                                .expect("Threads should return results")
+                        })
+                        .collect();
+                    for (heuristic_number, bound_results, runtime_results) in results_from_each_heuristic_variant.into_iter() {
+                        per_run_bound_data_multidimensional[*heuristic_number].append(bound_results);
+                        per_run_runtime_data_multidimensional[*heuristic_number].append(runtime_results);
                     }
                 }
+                // let mut results_from_each_tree = Vec::new();
+                // for thread_handle in thread_vec_number_of_trees {
+                //     results_from_each_tree.push(thread_handle.join());
+                // }
+                // let results_from_each_tree: Vec<_> = results_from_each_tree
+                //         .iter_mut()
+                //         .map(|thread_results| {
+                //             thread_results
+                //                 .as_mut()
+                //                 .expect("Threads should return results")
+                //         })
+                //         .collect();
+
+                // // Vec with vecs for each heuristic variant storing all results in successive order to merge together afterwards
+                // let mut per_run_bound_data_multidimensional = Vec::new();
+                // let mut per_run_runtime_data_multidimensional = Vec::new();
+
+                // for (index, (per_run_bound_data_tree, per_run_runtime_data_tree)) in results_from_each_tree.into_iter().enumerate() {
+                //     if index == 0 {
+                //         per_run_bound_data_multidimensional = per_run_bound_data_tree.to_vec();
+                //         per_run_runtime_data_multidimensional = per_run_runtime_data_tree.to_vec();
+                //     } else {
+                //         for heuristic_index in 0..per_run_bound_data_tree.len() {
+                //             per_run_bound_data_multidimensional[heuristic_index].append(&mut per_run_bound_data_tree[heuristic_index]);
+                //             per_run_runtime_data_multidimensional[heuristic_index].append(&mut per_run_runtime_data_tree[heuristic_index]);
+                //         }   
+                //     }
+                // }
+
+
                 info!("Thread {} (n, k, p) {:?}: Finished", thread_index, (n,k,p));
                 ((n,k,p), per_run_bound_data_multidimensional, per_run_runtime_data_multidimensional)
             }));
