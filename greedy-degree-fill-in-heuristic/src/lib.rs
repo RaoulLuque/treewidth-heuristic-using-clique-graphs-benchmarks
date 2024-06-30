@@ -62,7 +62,7 @@ fn greedy_degree_fill_in<N: Clone, E: Clone + Default>(
             }
         }
         if number_of_edges_that_would_have_to_be_added != 0 {
-            println!(
+            log::debug!(
                 "No simplicial vertex found in step: {}",
                 number_of_iterations
             );
@@ -117,21 +117,21 @@ mod tests {
 
         for _ in 0..25 {
             thread_vec.push(std::thread::spawn(|| {
-            let mut rng = rand::thread_rng();
+                let mut rng = rand::thread_rng();
 
-            let k: usize = (rng.gen::<f32>() * 50.0) as usize;
-            // n should be strictly greater than k otherwise k_tree has not guaranteed treewidth k
-            let n: usize = (rng.gen::<f32>() * 100.0) as usize + k + 1;
+                let k: usize = (rng.gen::<f32>() * 50.0) as usize;
+                // n should be strictly greater than k otherwise k_tree has not guaranteed treewidth k
+                let n: usize = (rng.gen::<f32>() * 100.0) as usize + k + 1;
 
-            let k_tree: Graph<i32, i32, petgraph::prelude::Undirected> =
-                generate_k_tree(k, n).expect("k should be smaller or eq to n");
-            let result = greedy_degree_fill_in_heuristic(&k_tree);
+                let k_tree: Graph<i32, i32, petgraph::prelude::Undirected> =
+                    generate_k_tree(k, n).expect("k should be smaller or eq to n");
+                let result = greedy_degree_fill_in_heuristic(&k_tree);
 
-            assert_eq!(
-                k, result,
-                "k_tree with n: {} and k: {} and graph: {:?}",
-                n, k, k_tree
-            );
+                assert_eq!(
+                    k, result,
+                    "k_tree with n: {} and k: {} and graph: {:?}",
+                    n, k, k_tree
+                );
             }));
         }
 

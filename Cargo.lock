@@ -276,6 +276,7 @@ name = "greedy-degree-fill-in-heuristic"
 version = "0.1.0"
 dependencies = [
  "itertools 0.13.0",
+ "log",
  "petgraph",
  "rand",
  "treewidth-heuristic-using-clique-graphs",

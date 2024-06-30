@@ -10,6 +10,7 @@ repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-ben
 [dependencies]
 petgraph = "0.6.4"
 itertools = "0.13"
+log = "0.4.21"
 
 [dev-dependencies]
 treewidth-heuristic-using-clique-graphs = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-using-clique-graphs"}
