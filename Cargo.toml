@@ -5,6 +5,7 @@ members = [
     "k-tree-benchmarks",
     "greedy-degree-fill-in-heuristic",
     "benchmark-suites",
+    "grid-benchmark"
 ]
 resolver = "2"
 

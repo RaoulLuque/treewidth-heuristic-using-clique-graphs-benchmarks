@@ -44,8 +44,9 @@ use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
-    (test_test_suite, "z_test_test_suite"),
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
+    // DEBUG
+    // (test_test_suite, "z_test_test_suite"),
     // Actual Tests
     (comparison_of_edge_weights, "comparison_of_edge_weights"),
     (
@@ -60,10 +61,10 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
         comparison_with_greedy_degree_fill_in,
         "comparison_with_greedy_degree_fill_in",
     ),
-    (
-        comparison_runtime_mst_and_fill_while,
-        "comparison_runtime_mst_and_fill_while",
-    ),
+    // (
+    //     comparison_runtime_mst_and_fill_while,
+    //     "comparison_runtime_mst_and_fill_while",
+    // ),
 ];
 
 pub fn test_if_fill_while_works() -> Vec<HeuristicTypes> {
@@ -137,7 +138,7 @@ pub enum EdgeWeightTypes<S> {
     ReturnI32Tuple(fn(&HashSet<NodeIndex, S>, &HashSet<NodeIndex, S>) -> (i32, i32)),
 }
 
-use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher};
+use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher, io::Write};
 
 pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     S: BuildHasher + Default,
@@ -426,4 +427,29 @@ pub fn current_time() -> String {
         .from_utc_datetime(&chrono::Local::now().to_utc().naive_utc())
         .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
         .to_string()
+}
+
+// Converting dot files to pdf in bulk:
+// FullPath -type f -name "*.dot" | xargs dot -Tpdf -O
+#[allow(dead_code)]
+pub fn create_dot_files<O: std::fmt::Debug, S>(
+    clique_graph_tree_after_filling_up: &petgraph::Graph<
+        HashSet<NodeIndex, S>,
+        O,
+        petgraph::prelude::Undirected,
+    >,
+    name: &str,
+) {
+    std::fs::create_dir_all("visualizations")
+        .expect("Could not create directory for visualizations");
+
+    let result_graph_dot_file = petgraph::dot::Dot::with_config(
+        clique_graph_tree_after_filling_up,
+        &[petgraph::dot::Config::EdgeNoLabel],
+    );
+
+    let mut w = std::fs::File::create(format!("visualizations/result_graph_{}.dot", name))
+        .expect("Result graph file could not be created");
+    write!(&mut w, "{:?}", result_graph_dot_file)
+        .expect("Unable to write dotfile for result graph to files");
 }

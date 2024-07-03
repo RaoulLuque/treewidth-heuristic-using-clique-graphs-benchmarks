@@ -1,0 +1,15 @@
+[package]
+name = "grid-benchmark"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+authors = ["Raoul Luque <raoulsluque@gmail.com>"]
+description = "Benchmark testing treewidth heuristic using clique graphs on grid graphs"
+repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-benchmarks"
+
+[dependencies]
+petgraph = "0.6.4"
+treewidth-heuristic-using-clique-graphs = { path = "/home/raoul/Documents/Produktivität/RWTH/Semester_6/Bachelorarbeit/treewidth-heuristic-using-clique-graphs"}
+log = "0.4.21"
+env_logger = "0.11.3"
+benchmark-suites = { path = "../benchmark-suites"}

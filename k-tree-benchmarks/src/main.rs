@@ -1,13 +1,8 @@
 use chrono::offset::Local;
 use csv::WriterBuilder;
 use log::{debug, info};
-use petgraph::dot::{Config, Dot};
-use petgraph::graph::NodeIndex;
 use petgraph::Graph;
-use std::collections::HashSet;
-use std::fmt::Debug;
-use std::fs::{self, File};
-use std::io::Write;
+use std::fs::File;
 use std::time::SystemTime;
 use std::{env, thread};
 
@@ -154,6 +149,7 @@ fn single_thread_benchmark() {
             }
 
             for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
+
                 let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
                 treewidth_heuristic_using_clique_graphs::generate_partial_k_tree_with_guaranteed_treewidth(
                     k,
@@ -175,7 +171,7 @@ fn single_thread_benchmark() {
                     for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
                         debug!(
                             "{} Starting calculation for tree number: {}, heuristic {:?} and {}-th graph",
-                            Local::now().to_utc().time().format("%H:%M:%S"),
+                            current_time(),
                             i, heuristic, j
                         );
 
@@ -326,7 +322,7 @@ fn multithread_benchmark() {
 
                 debug!(
                     "{} Starting calculation on graph: {:?}",
-                    Local::now().to_utc().time().format("%H:%M:%S"),
+                    current_time(),
                     (n, k, p)
                 );
                 let heuristics_variants_being_tested = heuristic_variants();
@@ -338,8 +334,6 @@ fn multithread_benchmark() {
                     per_run_bound_data_multidimensional.push(Vec::new());
                     per_run_runtime_data_multidimensional.push(Vec::new());
                 }
-
-                // let mut thread_vec_number_of_trees = Vec::new();
 
                 for i_th_tree in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
 
@@ -353,7 +347,10 @@ fn multithread_benchmark() {
                     )
                     .expect("n should be greater than k");
 
-
+                    if k == 10 && n >= 200 && (p == 30 || p == 40) && i_th_tree % 5 == 0 {
+                        info!("{} (n, k, p) = {:?}: Starting calculation for tree number: {}",
+                        current_time(), (n,k,p), i_th_tree);
+                    }
 
                     let mut heuristic_variant_thread_vec = Vec::new();
                     let heuristics_variants_being_tested = heuristic_variants();
@@ -374,7 +371,7 @@ fn multithread_benchmark() {
                             debug!(
                                 "Thread {} (n, k, p) = {:?}: {} Starting calculation for tree number: {}, heuristic {:?} and {}-th graph",
                                 thread_index, (n,k,p),
-                                Local::now().to_utc().time().format("%H:%M:%S"),
+                                current_time(),
                                 i_th_tree, heuristic, j
                             );
                             let graph = graph.clone();
@@ -415,20 +412,6 @@ fn multithread_benchmark() {
                                 .as_millis()
                                 .to_string())
                             }));
-                            // per_run_bound_data_multidimensional
-                            //     .get_mut(heuristic_number)
-                            //     .expect("Index should be in bound by loop invariant")
-                            //     .push(computed_treewidth.to_string());
-                            // per_run_runtime_data_multidimensional
-                            //     .get_mut(heuristic_number)
-                            //     .expect("Index should be in bound by loop invariant")
-                            //     .push(
-                            //         start
-                                // .elapsed()
-                                // .expect("Time should be trackable")
-                                // .as_millis()
-                                // .to_string()),
-                            //     );
                         }
                         let mut results_from_graph_repetitions = Vec::new();
                         for thread_handle in graph_repetition_thread_vec {
@@ -466,36 +449,6 @@ fn multithread_benchmark() {
                         per_run_runtime_data_multidimensional[*heuristic_number].append(runtime_results);
                     }
                 }
-                // let mut results_from_each_tree = Vec::new();
-                // for thread_handle in thread_vec_number_of_trees {
-                //     results_from_each_tree.push(thread_handle.join());
-                // }
-                // let results_from_each_tree: Vec<_> = results_from_each_tree
-                //         .iter_mut()
-                //         .map(|thread_results| {
-                //             thread_results
-                //                 .as_mut()
-                //                 .expect("Threads should return results")
-                //         })
-                //         .collect();
-
-                // // Vec with vecs for each heuristic variant storing all results in successive order to merge together afterwards
-                // let mut per_run_bound_data_multidimensional = Vec::new();
-                // let mut per_run_runtime_data_multidimensional = Vec::new();
-
-                // for (index, (per_run_bound_data_tree, per_run_runtime_data_tree)) in results_from_each_tree.into_iter().enumerate() {
-                //     if index == 0 {
-                //         per_run_bound_data_multidimensional = per_run_bound_data_tree.to_vec();
-                //         per_run_runtime_data_multidimensional = per_run_runtime_data_tree.to_vec();
-                //     } else {
-                //         for heuristic_index in 0..per_run_bound_data_tree.len() {
-                //             per_run_bound_data_multidimensional[heuristic_index].append(&mut per_run_bound_data_tree[heuristic_index]);
-                //             per_run_runtime_data_multidimensional[heuristic_index].append(&mut per_run_runtime_data_tree[heuristic_index]);
-                //         }   
-                //     }
-                // }
-
-
                 info!("Thread {} (n, k, p) {:?}: Finished", thread_index, (n,k,p));
                 ((n,k,p), per_run_bound_data_multidimensional, per_run_runtime_data_multidimensional)
             }));
@@ -549,79 +502,4 @@ fn multithread_benchmark() {
             .expect("Writing to csv should be possible");
         }
     }
-}
-
-// Converting dot files to pdf in bulk:
-// FullPath -type f -name "*.dot" | xargs dot -Tpdf -O
-#[allow(dead_code)]
-fn create_dot_files<O: Debug, S>(
-    graph: &Graph<i32, i32, petgraph::prelude::Undirected>,
-    clique_graph: &Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
-    clique_graph_tree_after_filling_up: &Graph<
-        HashSet<NodeIndex, S>,
-        O,
-        petgraph::prelude::Undirected,
-    >,
-    clique_graph_tree_before_filling_up: &Option<
-        Graph<HashSet<NodeIndex, S>, O, petgraph::prelude::Undirected>,
-    >,
-    i: usize,
-    name: &str,
-) {
-    fs::create_dir_all("k_tree_benchmarks/benchmark_results/visualizations")
-        .expect("Could not create directory for visualizations");
-
-    let start_graph_dot_file = Dot::with_config(graph, &[Config::EdgeNoLabel]);
-    let result_graph_dot_file =
-        Dot::with_config(clique_graph_tree_after_filling_up, &[Config::EdgeNoLabel]);
-    let clique_graph_dot_file = Dot::with_config(&clique_graph, &[Config::EdgeNoLabel]);
-
-    if let Some(clique_graph_tree_before_filling_up) = clique_graph_tree_before_filling_up {
-        let clique_graph_tree_before_filling_up_dot_file =
-            Dot::with_config(clique_graph_tree_before_filling_up, &[Config::EdgeNoLabel]);
-        let clique_graph_node_indices = Dot::with_config(
-            clique_graph_tree_before_filling_up,
-            &[Config::EdgeNoLabel, Config::NodeIndexLabel],
-        );
-
-        let mut w = fs::File::create(format!(
-            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_before_filling_{}.dot",
-            i, name
-        ))
-        .expect("Result graph without filling up file could not be created");
-        write!(&mut w, "{:?}", clique_graph_tree_before_filling_up_dot_file)
-            .expect("Unable to write dotfile for result graph without filling up to files");
-
-        let mut w = fs::File::create(format!(
-            "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_node_indices_{}.dot",
-            i, name
-        ))
-        .expect("Clique graph node indices file could not be created");
-        write!(&mut w, "{:?}", clique_graph_node_indices)
-            .expect("Unable to write dotfile for Clique graph node indices  to files");
-    }
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_starting_graph_{}.dot",
-        i, name
-    ))
-    .expect("Start graph file could not be created");
-    write!(&mut w, "{:?}", start_graph_dot_file)
-        .expect("Unable to write dotfile for start graph to files");
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_clique_graph_{}.dot",
-        i, name
-    ))
-    .expect("Start graph file could not be created");
-    write!(&mut w, "{:?}", clique_graph_dot_file)
-        .expect("Unable to write dotfile for start graph to files");
-
-    let mut w = fs::File::create(format!(
-        "k_tree_benchmarks/benchmark_results/visualizations/{}_result_graph_{}.dot",
-        i, name
-    ))
-    .expect("Result graph file could not be created");
-    write!(&mut w, "{:?}", result_graph_dot_file)
-        .expect("Unable to write dotfile for result graph to files");
 }

@@ -283,6 +283,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "grid-benchmark"
+version = "0.1.0"
+dependencies = [
+ "benchmark-suites",
+ "env_logger",
+ "log",
+ "petgraph",
+ "treewidth-heuristic-using-clique-graphs",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
