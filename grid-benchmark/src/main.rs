@@ -1,5 +1,8 @@
-use std::collections::HashSet;
+use moka::sync::Cache;
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::{collections::HashSet, thread::JoinHandle};
 
+use itertools::Itertools;
 use log::{debug, info};
 use petgraph::{
     graph::{EdgeIndex, NodeIndex},
@@ -10,9 +13,15 @@ use treewidth_heuristic_using_clique_graphs::{
     find_maximal_cliques::find_maximal_cliques,
 };
 
+const CACHE_SIZE: u64 = 15_000_017;
+
 fn main() {
     env_logger::init();
 
+    method_one();
+}
+
+fn method_one() {
     for n in 1..10 {
         let grid_graph = generate_grid_graph(n);
 
@@ -51,7 +60,10 @@ fn main() {
             promising_edges.push((starting_vertex, neighbour));
         }
 
-        let mut dict_with_seen_edges: HashSet<_> = HashSet::new();
+        // let mut dict_with_seen_edges: HashSet<_> = HashSet::new();
+        let cache_with_seen_edges = Cache::new(CACHE_SIZE);
+        let mut hasher = std::hash::DefaultHasher::new();
+        let mut max_entry_count_seen = 0;
 
         stack.push((current_spanning_tree_vertices, current_spanning_tree_edges));
 
@@ -65,16 +77,31 @@ fn main() {
                     .unzip::<_, _, Vec<_>, Vec<_>>()
                     .0
             );
+
+            // DEBUG
+            cache_with_seen_edges.run_pending_tasks();
+            let entry_count = cache_with_seen_edges.entry_count();
+            if entry_count % 1_000_000 == 0 && entry_count > max_entry_count_seen {
+                debug!("Number of entries in cache: {}", entry_count);
+            }
+
             let (current_spanning_tree_vertices, current_spanning_tree_edges) = stack
                 .pop()
                 .expect("Stack shouldn't be empty by loop invariant");
 
-            debug!("Current state of dict: {:?}", dict_with_seen_edges);
-
             let mut edges: Vec<_> = current_spanning_tree_edges.clone();
             edges.sort();
-            if !dict_with_seen_edges.insert(edges) {
-                continue;
+            edges.hash(&mut hasher);
+            let hash = hasher.finish() % CACHE_SIZE;
+            // println!("Hash is: {}", hash);
+            if let Some(known_edges) = cache_with_seen_edges.get(&hash) {
+                if edges == known_edges {
+                    continue;
+                } else {
+                    cache_with_seen_edges.insert(hash, edges.clone());
+                }
+            } else {
+                cache_with_seen_edges.insert(hash, edges.clone());
             }
 
             let promising_edges =
@@ -108,7 +135,15 @@ fn main() {
                     new_spanning_tree_vertices.push(new_vertex);
                     new_spanning_tree_edges.push((current_vertex, new_vertex));
 
-                    stack.push((new_spanning_tree_vertices, new_spanning_tree_edges));
+                    new_spanning_tree_edges.hash(&mut hasher);
+                    let hash = hasher.finish() % CACHE_SIZE;
+                    if let Some(known_edges) = cache_with_seen_edges.get(&hash) {
+                        if new_spanning_tree_edges != known_edges {
+                            stack.push((new_spanning_tree_vertices, new_spanning_tree_edges));
+                        }
+                    } else {
+                        stack.push((new_spanning_tree_vertices, new_spanning_tree_edges));
+                    }
                 }
             }
         }
@@ -117,15 +152,6 @@ fn main() {
             "n is: {} and the best upper bound found is: {}",
             n, best_treewidth_upper_bound
         );
-
-        println!(
-            "Total number of spanning trees: {}",
-            dict_with_seen_edges
-                .iter()
-                .filter(|v| v.len() == 11)
-                .collect::<Vec<_>>()
-                .len()
-        )
     }
 }
 
@@ -156,6 +182,94 @@ fn generate_grid_graph(n: usize) -> Graph<i32, i32, Undirected> {
     }
 
     graph
+}
+
+fn method_two() {
+    for n in 1..10 {
+        let grid_graph = generate_grid_graph(n);
+
+        let cliques_in_clique_graph =
+            find_maximal_cliques::<Vec<_>, _, std::hash::RandomState>(&grid_graph);
+        let (clique_graph_of_grid_graph, clique_graph_map) = construct_clique_graph_with_bags(
+            cliques_in_clique_graph,
+            treewidth_heuristic_using_clique_graphs::negative_intersection::<std::hash::RandomState>,
+        );
+        let clique_graph_edges: Vec<_> = clique_graph_of_grid_graph.edge_indices().collect();
+
+        let mut best_treewidth_upper_bound = usize::MAX;
+
+        let mut current_spanning_tree: Graph<
+            std::collections::HashSet<petgraph::prelude::NodeIndex>,
+            i32,
+            Undirected,
+        > = clique_graph_of_grid_graph.clone();
+        for i in (0..current_spanning_tree.edge_count()).rev() {
+            current_spanning_tree.remove_edge(EdgeIndex::new(i));
+        }
+
+        let mut optimal_bound_found = false;
+        let mut thread_vec: Vec<JoinHandle<usize>> = Vec::new();
+
+        for possible_spanning_tree in clique_graph_edges
+            .into_iter()
+            .combinations(clique_graph_of_grid_graph.node_count() - 1)
+        {
+            if optimal_bound_found {
+                break;
+            }
+
+            let mut current_spanning_tree = current_spanning_tree.clone();
+            let clique_graph_map = clique_graph_map.clone();
+            let clique_graph_of_grid_graph = clique_graph_of_grid_graph.clone();
+            if thread_vec.len() > 10000 {
+                println!("Threads cleaned");
+                for thread_handle in thread_vec {
+                    let upper_bound = thread_handle.join().expect("Thread should return usize");
+
+                    if upper_bound < best_treewidth_upper_bound {
+                        best_treewidth_upper_bound = upper_bound;
+                        info!(
+                            "Best upper bound reduced to: {}",
+                            best_treewidth_upper_bound
+                        );
+                        if best_treewidth_upper_bound == n {
+                            optimal_bound_found = true;
+                        }
+                    }
+                }
+                thread_vec = Vec::new();
+            }
+
+            thread_vec.push(std::thread::spawn(move || {
+                for edge_index in possible_spanning_tree {
+                    let (v, w) = clique_graph_of_grid_graph
+                        .edge_endpoints(edge_index)
+                        .expect("Edge should exist by construction");
+                    current_spanning_tree.add_edge(v, w, 0);
+                }
+
+                if !is_tree(&current_spanning_tree) {
+                    return usize::MAX;
+                }
+
+                let upper_bound = compute_upper_bound_for_given_spanning_tree(
+                    &mut current_spanning_tree,
+                    &clique_graph_map,
+                );
+
+                upper_bound
+            }));
+        }
+
+        for thread_handle in thread_vec {
+            thread_handle.join().expect("Thread should return usize");
+        }
+
+        println!(
+            "n is: {} and the best upper bound found is: {}",
+            n, best_treewidth_upper_bound
+        );
+    }
 }
 
 fn find_promising_edges(
@@ -191,6 +305,6 @@ fn compute_upper_bound_for_given_spanning_tree(
     treewidth_heuristic_using_clique_graphs::find_width_of_tree_decomposition::find_width_of_tree_decomposition(current_spanning_tree)
 }
 
-fn is_tree<S: Clone, E: Clone>(graph: &mut Graph<S, E, Undirected>) -> bool {
+fn is_tree<S: Clone, E: Clone>(graph: &Graph<S, E, Undirected>) -> bool {
     graph.node_count() == graph.edge_count() + 1 && treewidth_heuristic_using_clique_graphs::find_connected_components::find_connected_components::<Vec<_>, _, _, std::hash::RandomState>(&graph).collect::<Vec<_>>().len() == 1
 }

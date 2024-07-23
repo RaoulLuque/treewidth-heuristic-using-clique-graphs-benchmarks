@@ -13,3 +13,5 @@ treewidth-heuristic-using-clique-graphs = { path = "/home/raoul/Documents/Produk
 log = "0.4.21"
 env_logger = "0.11.3"
 benchmark-suites = { path = "../benchmark-suites"}
+itertools = "0.13.0"
+moka = { version = "0.12.7", features = ["sync"] }
