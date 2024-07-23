@@ -42,7 +42,7 @@ fn single_thread_benchmark() {
         .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
         .to_string();
 
-    for (heuristic_variants, benchmark_name) in TEST_SUITE {
+    for (heuristic_variants, benchmark_name) in vec![TEST_SUITE[4]] {
         println!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
