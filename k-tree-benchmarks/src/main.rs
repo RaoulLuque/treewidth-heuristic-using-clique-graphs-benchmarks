@@ -4,7 +4,7 @@ use log::{debug, info};
 use petgraph::Graph;
 use std::fs::File;
 use std::time::SystemTime;
-use std::{env, thread};
+use std::{env, thread, u32};
 
 use benchmark_suites::*;
 use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
@@ -57,21 +57,33 @@ fn main() {
     env_logger::init();
 
     let args: Vec<String> = env::args().collect();
+    let mut test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)> = Vec::new();
+
+    for command_line_argument in args.clone() {
+        if let Ok(int) = command_line_argument.parse::<usize>() {
+            test_suite_vec.push(TEST_SUITE[int]);
+        }
+    }
+
+    if test_suite_vec.len() == 0 {
+        test_suite_vec.extend(TEST_SUITE.iter());
+    }
+
     if args.len() > 1 {
         if let Some(command_line_argument) = args.get(1) {
             if command_line_argument == "multithread" {
-                multithread_benchmark()
+                multithread_benchmark(test_suite_vec)
             }
         }
     } else {
-        single_thread_benchmark()
+        single_thread_benchmark(test_suite_vec)
     }
 }
 
-fn single_thread_benchmark() {
+fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)>) {
     let date_and_time = current_time();
 
-    for (heuristic_variants, benchmark_name) in TEST_SUITE {
+    for (heuristic_variants, benchmark_name) in test_suite_vec {
         info!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
@@ -248,12 +260,12 @@ fn single_thread_benchmark() {
     }
 }
 
-fn multithread_benchmark() {
+fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)>) {
     println!("Multithreading");
 
     let date_and_time = current_time();
 
-    for (heuristic_variants, benchmark_name) in TEST_SUITE {
+    for (heuristic_variants, benchmark_name) in test_suite_vec {
         info!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 

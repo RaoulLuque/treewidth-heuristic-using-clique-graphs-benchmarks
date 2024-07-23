@@ -44,7 +44,7 @@ use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
     // DEBUG
     // (test_test_suite, "z_test_test_suite"),
     // Actual Tests
@@ -61,10 +61,14 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 4] = [
         comparison_with_greedy_degree_fill_in,
         "comparison_with_greedy_degree_fill_in",
     ),
-    // (
-    //     comparison_runtime_mst_and_fill_while,
-    //     "comparison_runtime_mst_and_fill_while",
-    // ),
+    (
+        comparison_runtime_mst_and_fill_while,
+        "comparison_running_time_mst_and_fill_while",
+    ),
+    (
+        comparison_of_exotic_spanning_tree_construction,
+        "comparison_of_exotic_spanning_tree_construction",
+    ),
 ];
 
 pub fn test_if_fill_while_works() -> Vec<HeuristicTypes> {
@@ -91,7 +95,14 @@ pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicTypes> {
 }
 
 pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
-    vec![MSTreINegIn, MSTreINiTLd, FilWhINegIn, FilWhINiTLd]
+    vec![
+        MSTreINegIn,
+        MSTreINiTLd,
+        MSTreILdTNi,
+        FilWhINegIn,
+        FilWhINiTLd,
+        FilWhILdTNi,
+    ]
 }
 
 pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicTypes> {
