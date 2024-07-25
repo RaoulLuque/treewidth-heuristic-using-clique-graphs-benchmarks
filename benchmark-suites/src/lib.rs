@@ -29,6 +29,8 @@ pub enum HeuristicTypes {
     // For comparison with bounded clique
     FilWhINiTLdIBC(usize),
 
+    FilWhINiTLdITrack,
+
     // Old / Not used
     FilWhINegIn,
     FilWhILeDif,
@@ -44,7 +46,7 @@ use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicTypes::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 7] = [
     // DEBUG
     // (test_test_suite, "z_test_test_suite"),
     // Actual Tests
@@ -68,6 +70,10 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 6] = [
     (
         comparison_of_exotic_spanning_tree_construction,
         "comparison_of_exotic_spanning_tree_construction",
+    ),
+    (
+        tracking_maximum_bag_size_whilst_constructing_fill_while_tree,
+        "tracking_maximum_bag_size_whilst_constructing_fill_while_tree",
     ),
 ];
 
@@ -117,6 +123,10 @@ pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicTypes> {
     vec![FilWhINiTLd, MSTreINiTLd]
 }
 
+pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<HeuristicTypes> {
+    vec![FilWhINiTLdITrack]
+}
+
 impl std::fmt::Display for HeuristicTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let display_string = match self {
@@ -139,6 +149,7 @@ impl std::fmt::Display for HeuristicTypes {
             GreedyDegreeFillIn => format!("GreedyDegreeFillIn"),
             MSTreIConst => "MSTreIConst".to_string(),
             MSTreIRandd => "MSTreIRandd".to_string(),
+            FilWhINiTLdITrack => "FilWhITrack".to_string(),
         };
         write!(f, "{}", display_string)
     }
@@ -212,6 +223,10 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
         GreedyDegreeFillIn => None,
         MSTreIConst => Some((MSTAndUseTreeStructure, ReturnI32(constant))),
         MSTreIRandd => Some((MSTAndUseTreeStructure, ReturnI32(random))),
+        FilWhINiTLdITrack => Some((
+            FillWhilstMSTAndLogBagSize,
+            EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
+        )),
     }
 }
 
@@ -236,6 +251,7 @@ pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
         GreedyDegreeFillIn => None,
         MSTreIConst => None,
         MSTreIRandd => None,
+        FilWhINiTLdITrack => None,
     }
 }
 
