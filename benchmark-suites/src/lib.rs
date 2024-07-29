@@ -27,7 +27,7 @@ pub enum HeuristicTypes {
     GreedyDegreeFillIn,
 
     // For comparison with bounded clique
-    FilWhINiTLdIBC(usize),
+    FilWhINiTLdIBC(i32),
 
     FilWhINiTLdITrack,
 
@@ -36,8 +36,8 @@ pub enum HeuristicTypes {
     FilWhILeDif,
     FiWhTINiTLd,
     FilWhILdTNi,
-    MSTreINiTLdIBC(usize),
-    FiWhTINiTLdIBC(usize),
+    MSTreINiTLdIBC(i32),
+    FiWhTINiTLdIBC(i32),
 }
 
 use chrono::TimeZone;
@@ -230,7 +230,7 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     }
 }
 
-pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<usize> {
+pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<i32> {
     match heuristic {
         MSTreIUnion => None,
         MSTreIDisjU => None,

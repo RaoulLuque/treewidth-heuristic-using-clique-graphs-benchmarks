@@ -4,7 +4,7 @@ use log::{debug, info};
 use petgraph::Graph;
 use std::fs::File;
 use std::time::SystemTime;
-use std::{env, thread, u32};
+use std::{env, thread};
 
 use benchmark_suites::*;
 use greedy_degree_fill_in_heuristic::greedy_degree_fill_in_heuristic;
@@ -26,31 +26,31 @@ type Hasher = std::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 type Hasher = std::hash::RandomState;
 
 /// First coordinate is the n, second k, third p
-pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 1] = [
-    // (50, 5, 30),
-    // (50, 5, 40),
-    // (50, 5, 50),
-    // (100, 5, 30),
-    // (100, 5, 40),
-    // (100, 5, 50),
-    // (200, 5, 30),
-    // (200, 5, 40),
+pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 24] = [
+    (50, 5, 30),
+    (50, 5, 40),
+    (50, 5, 50),
+    (100, 5, 30),
+    (100, 5, 40),
+    (100, 5, 50),
+    (200, 5, 30),
+    (200, 5, 40),
     (200, 5, 50),
-    // (500, 5, 30),
-    // (500, 5, 40),
-    // (500, 5, 50),
-    // (50, 10, 30),
-    // (50, 10, 40),
-    // (50, 10, 50),
-    // (100, 10, 30),
-    // (100, 10, 40),
-    // (100, 10, 50),
-    // (200, 10, 30),
-    // (200, 10, 40),
-    // (200, 10, 50),
-    // (500, 10, 30),
-    // (500, 10, 40),
-    // (500, 10, 50),
+    (500, 5, 30),
+    (500, 5, 40),
+    (500, 5, 50),
+    (50, 10, 30),
+    (50, 10, 40),
+    (50, 10, 50),
+    (100, 10, 30),
+    (100, 10, 40),
+    (100, 10, 50),
+    (200, 10, 30),
+    (200, 10, 40),
+    (200, 10, 50),
+    (500, 10, 30),
+    (500, 10, 40),
+    (500, 10, 50),
 ];
 
 fn main() {

@@ -1,6 +1,6 @@
 use moka::sync::Cache;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::{collections::HashSet, thread::JoinHandle};
+use std::thread::JoinHandle;
 
 use itertools::Itertools;
 use log::{debug, info};
@@ -63,7 +63,7 @@ fn method_one() {
         // let mut dict_with_seen_edges: HashSet<_> = HashSet::new();
         let cache_with_seen_edges = Cache::new(CACHE_SIZE);
         let mut hasher = std::hash::DefaultHasher::new();
-        let mut max_entry_count_seen = 0;
+        let max_entry_count_seen = 0;
 
         stack.push((current_spanning_tree_vertices, current_spanning_tree_edges));
 
