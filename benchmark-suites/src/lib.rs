@@ -5,7 +5,7 @@
 /// 5678910 Abbreviation of edge weights used
 /// BC Bounded Cliques (optional)
 /// I separation letter
-pub enum HeuristicTypes {
+pub enum HeuristicVariant {
     // For comparison of edge weights:
     MSTreILeDif,
     MSTreINegIn,
@@ -44,9 +44,9 @@ use chrono::TimeZone;
 use csv::Writer;
 use log::debug;
 use petgraph::graph::NodeIndex;
-use HeuristicTypes::*;
+use HeuristicVariant::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 7] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicVariant>, &str); 7] = [
     // DEBUG
     // (test_test_suite, "z_test_test_suite"),
     // Actual Tests
@@ -77,15 +77,15 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicTypes>, &str); 7] = [
     ),
 ];
 
-pub fn test_if_fill_while_works() -> Vec<HeuristicTypes> {
+pub fn test_if_fill_while_works() -> Vec<HeuristicVariant> {
     vec![FilWhINiTLd, MSTreINegIn, MSTreINiTLd]
 }
 
-pub fn test_test_suite() -> Vec<HeuristicTypes> {
+pub fn test_test_suite() -> Vec<HeuristicVariant> {
     vec![MSTreINegIn, MSTreIConst]
 }
 
-pub fn comparison_of_edge_weights() -> Vec<HeuristicTypes> {
+pub fn comparison_of_edge_weights() -> Vec<HeuristicVariant> {
     vec![
         MSTreILeDif,
         MSTreINegIn,
@@ -96,11 +96,11 @@ pub fn comparison_of_edge_weights() -> Vec<HeuristicTypes> {
     ]
 }
 
-pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicTypes> {
+pub fn comparison_of_combined_edge_weights() -> Vec<HeuristicVariant> {
     vec![MSTreINegIn, MSTreINiTLd, MSTreILdTNi]
 }
 
-pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
+pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicVariant> {
     vec![
         MSTreINegIn,
         MSTreINiTLd,
@@ -111,23 +111,23 @@ pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicTypes> {
     ]
 }
 
-pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicTypes> {
+pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicVariant> {
     vec![FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
 }
 
-pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicTypes> {
+pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicVariant> {
     vec![FilWhINiTLd, GreedyDegreeFillIn]
 }
 
-pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicTypes> {
+pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicVariant> {
     vec![FilWhINiTLd, MSTreINiTLd]
 }
 
-pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<HeuristicTypes> {
+pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<HeuristicVariant> {
     vec![FilWhINiTLdITrack]
 }
 
-impl std::fmt::Display for HeuristicTypes {
+impl std::fmt::Display for HeuristicVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let display_string = match self {
             MSTreIUnion => "MSTreIUnion".to_string(),
@@ -165,7 +165,7 @@ use std::{collections::HashSet, error::Error, fs::File, hash::BuildHasher, io::W
 pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     S: BuildHasher + Default,
 >(
-    heuristic: &HeuristicTypes,
+    heuristic: &HeuristicVariant,
 ) -> Option<(
     treewidth_heuristic_using_clique_graphs::SpanningTreeConstructionMethod,
     EdgeWeightTypes<S>,
@@ -230,7 +230,7 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     }
 }
 
-pub fn heuristic_to_clique_bound(heuristic: &HeuristicTypes) -> Option<i32> {
+pub fn heuristic_to_clique_bound(heuristic: &HeuristicVariant) -> Option<i32> {
     match heuristic {
         MSTreIUnion => None,
         MSTreIDisjU => None,

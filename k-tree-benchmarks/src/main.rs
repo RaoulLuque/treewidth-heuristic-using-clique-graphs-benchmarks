@@ -57,7 +57,7 @@ fn main() {
     env_logger::init();
 
     let args: Vec<String> = env::args().collect();
-    let mut test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)> = Vec::new();
+    let mut test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &str)> = Vec::new();
 
     for command_line_argument in args.clone() {
         if let Ok(int) = command_line_argument.parse::<usize>() {
@@ -80,7 +80,7 @@ fn main() {
     }
 }
 
-fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)>) {
+fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &str)>) {
     let date_and_time = current_time();
 
     for (heuristic_variants, benchmark_name) in test_suite_vec {
@@ -260,7 +260,7 @@ fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &st
     }
 }
 
-fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)>) {
+fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &str)>) {
     println!("Multithreading");
 
     let date_and_time = current_time();
@@ -374,7 +374,7 @@ fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicTypes>, &str)
                         let clique_bound = heuristic_to_clique_bound(heuristic);
                         let graph = graph.clone();
                         
-                        let heuristic: HeuristicTypes = heuristic.to_owned();
+                        let heuristic: HeuristicVariant = heuristic.to_owned();
 
                         heuristic_variant_thread_vec.push(thread::spawn(move || {
 
