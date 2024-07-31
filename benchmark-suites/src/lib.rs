@@ -47,7 +47,7 @@ use log::debug;
 use petgraph::graph::NodeIndex;
 use HeuristicVariant::*;
 
-pub const TEST_SUITE: [(fn() -> Vec<HeuristicVariant>, &str); 7] = [
+pub const TEST_SUITE: [(fn() -> Vec<HeuristicVariant>, &str); 8] = [
     // DEBUG
     // (test_test_suite, "z_test_test_suite"),
     // Actual Tests
@@ -75,6 +75,10 @@ pub const TEST_SUITE: [(fn() -> Vec<HeuristicVariant>, &str); 7] = [
     (
         tracking_maximum_bag_size_whilst_constructing_fill_while_tree,
         "tracking_maximum_bag_size_whilst_constructing_fill_while_tree",
+    ),
+    (
+        comparison_of_bounded_clique_heuristics,
+        "comparison_of_bounded_clique_heuristics",
     ),
 ];
 
@@ -129,7 +133,14 @@ pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<He
 }
 
 pub fn comparison_of_bounded_clique_heuristics() -> Vec<HeuristicVariant> {
-    vec![FilWhINiTLd, MSTreINegIn, FilWhINiTLdIBC(2), MSTreINegIn]
+    vec![
+        FilWhINiTLd,
+        MSTreINegIn,
+        FilWhINiTLdIBC(2),
+        MSTreINegInIBC(2),
+        FilWhINiTLdIBC(-1),
+        MSTreINegInIBC(-1),
+    ]
 }
 
 impl std::fmt::Display for HeuristicVariant {
