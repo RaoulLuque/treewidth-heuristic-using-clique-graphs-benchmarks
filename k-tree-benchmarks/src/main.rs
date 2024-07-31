@@ -73,7 +73,11 @@ fn main() {
         if let Some(command_line_argument) = args.get(1) {
             if command_line_argument == "multithread" {
                 multithread_benchmark(test_suite_vec)
+            } else {
+                single_thread_benchmark(test_suite_vec)
             }
+        } else {
+            single_thread_benchmark(test_suite_vec) 
         }
     } else {
         single_thread_benchmark(test_suite_vec)
@@ -359,7 +363,8 @@ fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &st
                     )
                     .expect("n should be greater than k");
 
-                    if k == 10 && n >= 200 && (p == 30 || p == 40) && i_th_tree % 5 == 0 {
+                    if k == 10 && n >= 200 && (p == 30 || p == 40) && i_th_tree % 5 == 0 ||
+                     k == 5 && n >= 200 && i_th_tree % 5 == 0 {
                         info!("{} (n, k, p) = {:?}: Starting calculation for tree number: {}",
                         current_time(), (n,k,p), i_th_tree);
                     }
