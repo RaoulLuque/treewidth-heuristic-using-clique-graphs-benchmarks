@@ -778,7 +778,6 @@ dependencies = [
 name = "treewidth-heuristic-using-clique-graphs"
 version = "0.1.0"
 dependencies = [
- "csv",
  "itertools 0.13.0",
  "log",
  "petgraph",

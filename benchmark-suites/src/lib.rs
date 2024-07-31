@@ -120,7 +120,7 @@ pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicVariant> {
 }
 
 pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicVariant> {
-    vec![FilWhINiTLd, MSTreINiTLd]
+    vec![FilWhINiTLd, MSTreINiTLd, GreedyDegreeFillIn]
 }
 
 pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<HeuristicVariant> {
