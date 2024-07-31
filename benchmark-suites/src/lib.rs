@@ -28,6 +28,7 @@ pub enum HeuristicVariant {
 
     // For comparison with bounded clique
     FilWhINiTLdIBC(i32),
+    MSTreINegInIBC(i32),
 
     FilWhINiTLdITrack,
 
@@ -127,6 +128,10 @@ pub fn tracking_maximum_bag_size_whilst_constructing_fill_while_tree() -> Vec<He
     vec![FilWhINiTLdITrack]
 }
 
+pub fn comparison_of_bounded_clique_heuristics() -> Vec<HeuristicVariant> {
+    vec![FilWhINiTLd, MSTreINegIn, FilWhINiTLdIBC(2), MSTreINegIn]
+}
+
 impl std::fmt::Display for HeuristicVariant {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let display_string = match self {
@@ -146,6 +151,7 @@ impl std::fmt::Display for HeuristicVariant {
             MSTreINiTLdIBC(clique_bound) => format!("MSTreINiTLdIBC{}", clique_bound),
             FilWhINiTLdIBC(clique_bound) => format!("FilWhINiTLdIBC{}", clique_bound),
             FiWhTINiTLdIBC(clique_bound) => format!("FiWhTINiTLdIBC{}", clique_bound),
+            MSTreINegInIBC(clique_bound) => format!("MSTreINegInIBC{}", clique_bound),
             GreedyDegreeFillIn => format!("GreedyDegreeFillIn"),
             MSTreIConst => "MSTreIConst".to_string(),
             MSTreIRandd => "MSTreIRandd".to_string(),
@@ -212,6 +218,7 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
             MSTAndUseTreeStructure,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
+        MSTreINegInIBC(_) => Some((MSTAndUseTreeStructure, ReturnI32(negative_intersection))),
         FilWhINiTLdIBC(_) => Some((
             FillWhilstMST,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
@@ -248,6 +255,7 @@ pub fn heuristic_to_clique_bound(heuristic: &HeuristicVariant) -> Option<i32> {
         MSTreINiTLdIBC(clique_bound) => Some(*clique_bound),
         FilWhINiTLdIBC(clique_bound) => Some(*clique_bound),
         FiWhTINiTLdIBC(clique_bound) => Some(*clique_bound),
+        MSTreINegInIBC(clique_bound) => Some(*clique_bound),
         GreedyDegreeFillIn => None,
         MSTreIConst => None,
         MSTreIRandd => None,
