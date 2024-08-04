@@ -117,7 +117,7 @@ pub fn comparison_of_spanning_tree_construction() -> Vec<HeuristicVariant> {
 }
 
 pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicVariant> {
-    vec![FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
+    vec![MSTreINegIn, FilWhINiTLd, FWhUEINiTLd, FWBagINonee]
 }
 
 pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicVariant> {
