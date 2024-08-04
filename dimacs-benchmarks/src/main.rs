@@ -222,7 +222,7 @@ pub fn multithread_benchmark() {
         .to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
         .to_string();
 
-    for (heuristic_variants, benchmark_name) in TEST_SUITE {
+    for (heuristic_variants, benchmark_name) in vec![TEST_SUITE[4]] {
         debug!("Starting new part of test_suite: {}", benchmark_name);
         let heuristics_variants_being_tested = heuristic_variants();
 
@@ -283,7 +283,7 @@ pub fn multithread_benchmark() {
 
         // Sorting files in dimacs directory
         let dimacs_graphs_paths: fs::ReadDir =
-            fs::read_dir("dimacs-benchmarks/dimacs_graphs/color/").unwrap();
+            fs::read_dir("dimacs-benchmarks/dimacs_graphs/tmp/").unwrap();
         let mut dimacs_graph_paths_vec = Vec::new();
         for graph_path_res in dimacs_graphs_paths {
             if let Ok(graph_path) = graph_path_res {
@@ -317,14 +317,14 @@ pub fn multithread_benchmark() {
 
             debug!(
                 "{} Starting calculation on graph: {:?}",
-                Local::now().to_utc().time().format("%H:%M:%S"),
+                current_time(),
                 graph_file_name
             );
             thread_vec.push(thread::spawn(move || {
-                info!("Thread {} starting", thread_index);
+                info!("{} Thread {} starting on graph {:?}", current_time(), thread_index, graph_file_name);
 
-                let mut per_run_bound_data = Vec::new();
-                let mut per_run_runtime_data = Vec::new();
+                let mut per_run_bound_data: Vec<String> = Vec::new();
+                let mut per_run_runtime_data: Vec<String> = Vec::new();
                 let graph_file_name_string = graph_file_name
                     .into_string()
                     .expect("Graph file name should be a valid utf8 String");
@@ -337,17 +337,26 @@ pub fn multithread_benchmark() {
 
                 per_run_bound_data.push(graph_file_name_string.to_owned());
                 per_run_bound_data.push(upper_bound_string.to_owned());
-                per_run_runtime_data.push(graph_file_name_string);
+                per_run_runtime_data.push(graph_file_name_string.to_owned());
                 per_run_runtime_data.push(upper_bound_string);
 
-                for heuristic in heuristics_variants_being_tested.iter() {
+                for heuristic in heuristics_variants_being_tested.into_iter() {
                     let spanning_tree_computation_and_edge_weight =
                         heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic(
                             &heuristic,
                         );
                     let clique_bound = heuristic_to_clique_bound(&heuristic);
+                    let mut thread_vec_runs = Vec::new();
 
-                    for _ in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                    for j in 0..NUMBER_OF_REPETITIONS_PER_GRAPH {
+                        let spanning_tree_computation_and_edge_weight = match spanning_tree_computation_and_edge_weight {
+                            Some(ref value) => Some((value.0.clone(), value.1.clone())),
+                            None => None,
+                        };
+                        let graph = graph.clone();
+                        let graph_file_name_string = graph_file_name_string.to_owned();
+
+                        thread_vec_runs.push(thread::spawn(move || {
                         // Time the calculation
                         let start = SystemTime::now();
 
@@ -379,17 +388,49 @@ pub fn multithread_benchmark() {
                                 }
                                 None => greedy_degree_fill_in_heuristic(&graph),
                             };
+                        
+                        if (graph_file_name_string == "le450_15c.col" 
+                        || graph_file_name_string == "le450_15d.col" 
+                        || graph_file_name_string == "le450_25c.col" 
+                        || graph_file_name_string == "le450_25d.col") && heuristic == HeuristicVariant::FilWhINiTLd {
+                            println!(
+                                "{} Graph {} finished the {}-th repetition for Fill While",
+                                current_time(),
+                                graph_file_name_string,
+                                j
+                            );
+                        }
 
-                        per_run_bound_data.push(computed_treewidth_upper_bound.to_string());
-                        per_run_runtime_data.push(
-                            start
+                        (computed_treewidth_upper_bound.to_string(), start
                                 .elapsed()
                                 .expect("Time should be trackable")
                                 .as_millis()
-                                .to_string(),
-                        );
+                                .to_string()
+                        )
+                        }));
                     }
+                    let mut results_from_each_thread_run = Vec::new();
+                    for thread_handle in thread_vec_runs {
+                        results_from_each_thread_run.push(thread_handle.join());
+                    }
+
+                    let results_from_each_thread_run: Vec<_> = results_from_each_thread_run
+                        .iter_mut()
+                        .map(|thread_results| {
+                            thread_results
+                                .as_mut()
+                                .expect("Threads should return results")
+                        })
+                        .collect();
+
+                    for (per_repetition_bound_data, per_repetition_runtime_data) in results_from_each_thread_run {
+                        per_run_bound_data.push(per_repetition_bound_data.to_owned());
+                        per_run_runtime_data.push(per_repetition_runtime_data.to_owned());
+                    }
+                    
+
                 }
+                info!("{} Thread {} finished on graph {:?}", current_time(), thread_index, graph_file_name_string);
                 (per_run_bound_data, per_run_runtime_data)
             }));
         }
