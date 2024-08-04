@@ -1,0 +1,23 @@
+Graph name,Upper Bound,FilWhINiTLd,MSTreINiTLd,GreedyDegreeFillIn
+zeroin.i.3.col,None,57,57,33
+zeroin.i.2.col,None,57,62,33
+zeroin.i.1.col,None,96,99,50
+mulsol.i.5.col,31,49,59,32
+mulsol.i.4.col,32,49,58,32
+mulsol.i.3.col,32,49,58,32
+mulsol.i.2.col,32,49,58,32
+mulsol.i.1.col,50,66,66,50
+le450_5d.col,303,438,449,299
+le450_5c.col,315,442,449,315
+le450_5b.col,309,423,434,318
+le450_5a.col,307,427,437,315
+le450_25b.col,251,360,368,265
+le450_25a.col,255,371,361,250
+le450_15b.col,289,391,409,291
+le450_15a.col,None,403,408,290
+inithx.i.3.col,31,65,102,31
+inithx.i.2.col,31,64,101,31
+inithx.i.1.col,56,65,90,56
+fpsol2.i.3.col,31,44,92,31
+fpsol2.i.2.col,31,43,112,31
+fpsol2.i.1.col,66,72,101,66
