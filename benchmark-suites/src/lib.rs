@@ -121,7 +121,7 @@ pub fn comparison_of_exotic_spanning_tree_construction() -> Vec<HeuristicVariant
 }
 
 pub fn comparison_with_greedy_degree_fill_in() -> Vec<HeuristicVariant> {
-    vec![FilWhINiTLd, GreedyDegreeFillIn]
+    vec![MSTreINegIn, FilWhINiTLd, GreedyDegreeFillIn]
 }
 
 pub fn comparison_runtime_mst_and_fill_while() -> Vec<HeuristicVariant> {
