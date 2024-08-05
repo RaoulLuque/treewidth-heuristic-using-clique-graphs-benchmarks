@@ -1,4 +1,4 @@
-| Graph name           | Upper bound  | FiWhNiTLd   | FWNITLDB    |
+| Graph name           | Upper bound  | FiWhNiTSd   | FWNITSdB    |
 | zzmulsol.i.1.col     | 50           | 66   830    | 75   177329 |
 | zzeroin.i.1.col      | None         | 96   829    | 109  146054 |
 | zeroin.i.3.col       | None         | 57   1456   | 140  654173 |

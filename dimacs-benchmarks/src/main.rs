@@ -392,7 +392,7 @@ pub fn multithread_benchmark() {
                         if (graph_file_name_string == "le450_15c.col" 
                         || graph_file_name_string == "le450_15d.col" 
                         || graph_file_name_string == "le450_25c.col" 
-                        || graph_file_name_string == "le450_25d.col") && heuristic == HeuristicVariant::FilWhINiTLd {
+                        || graph_file_name_string == "le450_25d.col") && heuristic == HeuristicVariant::FilWhINiTSd {
                             println!(
                                 "{} Graph {} finished the {}-th repetition for Fill While",
                                 current_time(),
