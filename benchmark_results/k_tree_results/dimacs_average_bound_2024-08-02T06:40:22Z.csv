@@ -1,4 +1,4 @@
-Graph name,Upper Bound,FilWhINiTLd,MSTreINiTLd,GreedyDegreeFillIn
+Graph name,Upper Bound,FilWhINiTSd,MSTreINiTSd,GreedyDegreeFillIn
 zeroin.i.3.col,None,57,57,33
 zeroin.i.2.col,None,57,62,33
 zeroin.i.1.col,None,96,99,50

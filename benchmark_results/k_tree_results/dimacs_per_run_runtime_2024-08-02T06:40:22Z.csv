@@ -1,4 +1,4 @@
-Graph name,Upper Bound,FilWhINiTLd,FilWhINiTLd,FilWhINiTLd,FilWhINiTLd,FilWhINiTLd,MSTreINiTLd,MSTreINiTLd,MSTreINiTLd,MSTreINiTLd,MSTreINiTLd,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn
+Graph name,Upper Bound,FilWhINiTSd,FilWhINiTSd,FilWhINiTSd,FilWhINiTSd,FilWhINiTSd,MSTreINiTSd,MSTreINiTSd,MSTreINiTSd,MSTreINiTSd,MSTreINiTSd,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn,GreedyDegreeFillIn
 zeroin.i.3.col,None,22282,30038,24373,29648,29573,1143,1070,1037,1069,991,47009,46886,46501,47999,46029
 zeroin.i.2.col,None,30877,31070,30129,29549,29050,1073,1094,1073,1169,1099,48267,48660,47641,48229,47776
 zeroin.i.1.col,None,15526,15461,15231,15035,14942,1410,1397,1440,1420,1359,81406,82331,83076,84707,82611
