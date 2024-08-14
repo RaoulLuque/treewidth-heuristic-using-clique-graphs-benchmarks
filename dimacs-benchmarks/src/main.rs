@@ -388,7 +388,6 @@ pub fn multithread_benchmark() {
                                 }
                                 None => greedy_degree_fill_in_heuristic(&graph),
                             };
-                        
                         if (graph_file_name_string == "le450_15c.col" 
                         || graph_file_name_string == "le450_15d.col" 
                         || graph_file_name_string == "le450_25c.col" 
@@ -427,8 +426,6 @@ pub fn multithread_benchmark() {
                         per_run_bound_data.push(per_repetition_bound_data.to_owned());
                         per_run_runtime_data.push(per_repetition_runtime_data.to_owned());
                     }
-                    
-
                 }
                 info!("{} Thread {} finished on graph {:?}", current_time(), thread_index, graph_file_name_string);
                 (per_run_bound_data, per_run_runtime_data)

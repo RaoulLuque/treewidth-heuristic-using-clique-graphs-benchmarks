@@ -77,7 +77,7 @@ fn main() {
                 single_thread_benchmark(test_suite_vec)
             }
         } else {
-            single_thread_benchmark(test_suite_vec) 
+            single_thread_benchmark(test_suite_vec)
         }
     } else {
         single_thread_benchmark(test_suite_vec)
@@ -165,7 +165,6 @@ fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &
             }
 
             for i in 0..NUMBER_OF_TREES_PER_BENCHMARK_VARIANT {
-
                 let graph: Graph<i32, i32, petgraph::prelude::Undirected> =
                 treewidth_heuristic_using_clique_graphs::generate_partial_k_tree_with_guaranteed_treewidth(
                     k,
@@ -375,10 +374,8 @@ fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &st
                     for (heuristic_number, heuristic) in
                         heuristics_variants_being_tested.iter().enumerate()
                     {
-                        
                         let clique_bound = heuristic_to_clique_bound(heuristic);
                         let graph = graph.clone();
-                        
                         let heuristic: HeuristicVariant = heuristic.to_owned();
 
                         heuristic_variant_thread_vec.push(thread::spawn(move || {
