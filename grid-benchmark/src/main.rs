@@ -1,5 +1,5 @@
 use moka::sync::Cache;
-use std::hash::{DefaultHasher, Hash, Hasher};
+use std::hash::{Hash, Hasher};
 use std::thread::JoinHandle;
 
 use itertools::Itertools;

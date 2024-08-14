@@ -14,8 +14,8 @@ use treewidth_heuristic_using_clique_graphs::compute_treewidth_upper_bound_not_c
 // const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 1;
 // const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 1;
 
-const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 5;
-const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 20;
+const NUMBER_OF_REPETITIONS_PER_GRAPH: usize = 300;
+const NUMBER_OF_TREES_PER_BENCHMARK_VARIANT: usize = 1;
 
 // Debug version
 #[cfg(debug_assertions)]
@@ -26,31 +26,31 @@ type Hasher = std::hash::BuildHasherDefault<rustc_hash::FxHasher>;
 type Hasher = std::hash::RandomState;
 
 /// First coordinate is the n, second k, third p
-pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 24] = [
-    (50, 5, 30),
-    (50, 5, 40),
-    (50, 5, 50),
-    (100, 5, 30),
-    (100, 5, 40),
-    (100, 5, 50),
-    (200, 5, 30),
-    (200, 5, 40),
-    (200, 5, 50),
-    (500, 5, 30),
+pub const PARTIAL_K_TREE_CONFIGURATIONS: [(usize, usize, usize); 1] = [
+    // (50, 5, 30),
+    // (50, 5, 40),
+    // (50, 5, 50),
+    // (100, 5, 30),
+    // (100, 5, 40),
+    // (100, 5, 50),
+    // (200, 5, 30),
+    // (200, 5, 40),
+    // (200, 5, 50),
+    // (500, 5, 30),
     (500, 5, 40),
-    (500, 5, 50),
-    (50, 10, 30),
-    (50, 10, 40),
-    (50, 10, 50),
-    (100, 10, 30),
-    (100, 10, 40),
-    (100, 10, 50),
-    (200, 10, 30),
-    (200, 10, 40),
-    (200, 10, 50),
-    (500, 10, 30),
-    (500, 10, 40),
-    (500, 10, 50),
+    // (500, 5, 50),
+    // (50, 10, 30),
+    // (50, 10, 40),
+    // (50, 10, 50),
+    // (100, 10, 30),
+    // (100, 10, 40),
+    // (100, 10, 50),
+    // (200, 10, 30),
+    // (200, 10, 40),
+    // (200, 10, 50),
+    // (500, 10, 30),
+    // (500, 10, 40),
+    // (500, 10, 50),
 ];
 
 fn main() {
@@ -196,7 +196,7 @@ fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &
 
                         let computed_treewidth = match computation_method {
                             Some((computation_type, EdgeWeightTypes::ReturnI32(a))) => {
-                                compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                     &graph,
                                     a,
                                     computation_type,
@@ -205,7 +205,7 @@ fn single_thread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &
                                 )
                             }
                             Some((computation_type, EdgeWeightTypes::ReturnI32Tuple(a))) => {
-                                compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                     &graph,
                                     a,
                                     computation_type,
@@ -404,7 +404,7 @@ fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &st
 
                             let computed_treewidth = match computation_method {
                                 Some((computation_type, EdgeWeightTypes::ReturnI32(a))) => {
-                                    compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                         &graph,
                                         a,
                                         computation_type,
@@ -413,7 +413,7 @@ fn multithread_benchmark(test_suite_vec: Vec<(fn() -> Vec<HeuristicVariant>, &st
                                     )
                                 }
                                 Some((computation_type, EdgeWeightTypes::ReturnI32Tuple(a))) => {
-                                    compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                         &graph,
                                         a,
                                         computation_type,

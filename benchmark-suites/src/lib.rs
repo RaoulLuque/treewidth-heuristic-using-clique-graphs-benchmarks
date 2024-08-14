@@ -141,15 +141,13 @@ pub fn comparison_of_bounded_clique_heuristics() -> Vec<HeuristicVariant> {
         MSTreINegInIBC(2),
         FilWhINiTSdIBC(-1),
         MSTreINegInIBC(-1),
-        FilWhINiTLdIBC(-3),
-        MSTreINegInIBC(-3),
-        FilWhINiTLdIBC(-5),
-        MSTreINegInIBC(-5),
+        FilWhINiTSdIBC(-2),
+        MSTreINegInIBC(-2),
     ]
 }
 
 pub fn variance() -> Vec<HeuristicVariant> {
-    vec![FilWhINiTLd, MSTreINegIn]
+    vec![FilWhINiTSd, MSTreINegIn]
 }
 
 impl std::fmt::Display for HeuristicVariant {
@@ -201,58 +199,58 @@ pub fn heuristic_to_spanning_tree_computation_type_and_edge_weight_heuristic<
     use treewidth_heuristic_using_clique_graphs::*;
     use EdgeWeightTypes::*;
     match heuristic {
-        MSTreIUnion => Some((MSTAndUseTreeStructure, ReturnI32(union))),
-        MSTreIDisjU => Some((MSTAndUseTreeStructure, ReturnI32(disjoint_union))),
-        MSTreINegIn => Some((MSTAndUseTreeStructure, ReturnI32(negative_intersection))),
-        FilWhINegIn => Some((FillWhilstMST, ReturnI32(negative_intersection))),
-        MSTreISyDif => Some((MSTAndUseTreeStructure, ReturnI32(least_difference))),
-        FilWhISyDif => Some((FillWhilstMST, ReturnI32(least_difference))),
+        MSTreIUnion => Some((MSTreIUseTr, ReturnI32(union))),
+        MSTreIDisjU => Some((MSTreIUseTr, ReturnI32(disjoint_union))),
+        MSTreINegIn => Some((MSTreIUseTr, ReturnI32(negative_intersection))),
+        FilWhINegIn => Some((FilWh, ReturnI32(negative_intersection))),
+        MSTreISyDif => Some((MSTreIUseTr, ReturnI32(least_difference))),
+        FilWhISyDif => Some((FilWh, ReturnI32(least_difference))),
         MSTreILdTNi => Some((
-            MSTAndUseTreeStructure,
+            MSTreIUseTr,
             EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection),
         )),
         FilWhILdTNi => Some((
-            FillWhilstMST,
+            FilWh,
             EdgeWeightTypes::ReturnI32Tuple(least_difference_then_negative_intersection),
         )),
         MSTreINiTSd => Some((
-            MSTAndUseTreeStructure,
+            MSTreIUseTr,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         FilWhINiTSd => Some((
-            FillWhilstMST,
+            FilWh,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         FWhUEINiTSd => Some((
-            FillWhilstMSTEdgeUpdate,
+            FWhUE,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         FiWhTINiTSd => Some((
-            FillWhilstMSTTree,
+            FilWhIUseTr,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         FWBagINonee => Some((
-            FillWhilstMSTBagSize,
+            FWBag,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         MSTreINiTSdIBC(_) => Some((
-            MSTAndUseTreeStructure,
+            MSTreIUseTr,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
-        MSTreINegInIBC(_) => Some((MSTAndUseTreeStructure, ReturnI32(negative_intersection))),
+        MSTreINegInIBC(_) => Some((MSTreIUseTr, ReturnI32(negative_intersection))),
         FilWhINiTSdIBC(_) => Some((
-            FillWhilstMST,
+            FilWh,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         FiWhTINiTSdIBC(_) => Some((
-            FillWhilstMSTTree,
+            FilWhIUseTr,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
         GreedyDegreeFillIn => None,
-        MSTreIConst => Some((MSTAndUseTreeStructure, ReturnI32(constant))),
-        MSTreIRandd => Some((MSTAndUseTreeStructure, ReturnI32(random))),
+        MSTreIConst => Some((MSTreIUseTr, ReturnI32(constant))),
+        MSTreIRandd => Some((MSTreIUseTr, ReturnI32(random))),
         FilWhINiTSdITrack => Some((
-            FillWhilstMSTAndLogBagSize,
+            FilWhILogBagSize,
             EdgeWeightTypes::ReturnI32Tuple(negative_intersection_then_least_difference),
         )),
     }

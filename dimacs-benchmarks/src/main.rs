@@ -168,7 +168,7 @@ fn single_thread_benchmark() {
                             Some((
                                 computation_type,
                                 EdgeWeightTypes::ReturnI32(edge_weight_heuristic),
-                            )) => compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                            )) => compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                 &graph,
                                 edge_weight_heuristic,
                                 computation_type,
@@ -178,7 +178,7 @@ fn single_thread_benchmark() {
                             Some((
                                 computation_type,
                                 EdgeWeightTypes::ReturnI32Tuple(edge_weight_heuristic),
-                            )) => compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                            )) => compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                 &graph,
                                 edge_weight_heuristic,
                                 computation_type,
@@ -366,7 +366,7 @@ pub fn multithread_benchmark() {
                                     computation_type,
                                     EdgeWeightTypes::ReturnI32(edge_weight_heuristic),
                                 )) => {
-                                    compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                         &graph,
                                         edge_weight_heuristic,
                                         computation_type,
@@ -378,7 +378,7 @@ pub fn multithread_benchmark() {
                                     computation_type,
                                     EdgeWeightTypes::ReturnI32Tuple(edge_weight_heuristic),
                                 )) => {
-                                    compute_treewidth_upper_bound_not_connected::<_, _, Hasher, _>(
+                                    compute_treewidth_upper_bound_not_connected::<_, _, _, Hasher>(
                                         &graph,
                                         edge_weight_heuristic,
                                         computation_type,
