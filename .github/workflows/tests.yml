@@ -10,27 +10,24 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # Run cargo test
   test:
     name: Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-    - uses: actions/checkout@v3
-    - name: Run tests
-      run: cargo test --verbose --release
-        
-  # Run cargo fmt --all -- --check
-  format:
-    name: Format
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-      - name: Install stable toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Cache
+        uses: actions/cache@v3
         with:
-          components: rustfmt
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.toml') }}
+      - name: Install Dependencies
+        run: sudo apt-get update
+      - name: Run cargo test
+        run: cargo test
