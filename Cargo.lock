@@ -119,7 +119,7 @@ dependencies = [
  "csv",
  "log",
  "petgraph",
- "treewidth-heuristic-using-clique-graphs 0.1.0 (git+https://github.com/RaoulLuque/treewidth-heuristic-using-clique-graphs)",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -231,7 +231,7 @@ dependencies = [
  "petgraph",
  "rustc-hash",
  "serde",
- "treewidth-heuristic-using-clique-graphs 0.1.0 (git+https://github.com/RaoulLuque/treewidth-heuristic-using-clique-graphs)",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -309,7 +309,7 @@ dependencies = [
  "log",
  "petgraph",
  "rand",
- "treewidth-heuristic-using-clique-graphs 0.1.0",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -322,7 +322,7 @@ dependencies = [
  "log",
  "moka",
  "petgraph",
- "treewidth-heuristic-using-clique-graphs 0.1.0 (git+https://github.com/RaoulLuque/treewidth-heuristic-using-clique-graphs)",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -424,7 +424,7 @@ dependencies = [
  "rustc-hash",
  "serde",
  "tokio",
- "treewidth-heuristic-using-clique-graphs 0.1.0 (git+https://github.com/RaoulLuque/treewidth-heuristic-using-clique-graphs)",
+ "treewidth-heuristic-using-clique-graphs",
 ]
 
 [[package]]
@@ -772,18 +772,6 @@ checksum = "daa4fb1bc778bd6f04cbfc4bb2d06a7396a8f299dc33ea1900cedaa316f467b1"
 dependencies = [
  "backtrace",
  "pin-project-lite",
-]
-
-[[package]]
-name = "treewidth-heuristic-using-clique-graphs"
-version = "0.1.0"
-dependencies = [
- "csv",
- "itertools 0.13.0",
- "log",
- "petgraph",
- "rand",
- "rustc-hash",
 ]
 
 [[package]]
