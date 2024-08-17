@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-    "k-tree-benchmarks",
     "greedy-degree-fill-in-heuristic",
     "benchmark-suites",
+    "k-tree-benchmarks",
     "dimacs-benchmarks",
     "grid-benchmark"
 ]
