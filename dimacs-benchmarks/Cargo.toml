@@ -11,9 +11,9 @@ repository = "https://github.com/RaoulLuque/treewidth-heuristic-clique-graph-ben
 serde = { version = "1.0", features = ["derive"] }
 petgraph = "0.6.4"
 treewidth-heuristic-using-clique-graphs = { git = "https://github.com/RaoulLuque/treewidth-heuristic-using-clique-graphs"}
-benchmark-suites = { path = "../benchmark-suites"}
-greedy-degree-fill-in-heuristic = { path = "../greedy-degree-fill-in-heuristic"}
-dimacs_petgraph_parser = { git = "https://github.com/RaoulLuque/dimacs-petgraph-parser" }
+benchmark-suites = { path = "../benchmark-suites", version="0.1.0"}
+greedy-degree-fill-in-heuristic = { path = "../greedy-degree-fill-in-heuristic", version="0.1.0"}
+dimacs_petgraph_parser = { git = "https://github.com/RaoulLuque/dimacs-petgraph-parser"}
 env_logger = "0.11.3"
 rustc-hash = { git = "https://github.com/rust-lang/rustc-hash"}
 chrono = "0.4.38"
