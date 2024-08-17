@@ -1,10 +1,10 @@
 [workspace]
 
 members = [
-    "dimacs-benchmarks",
     "k-tree-benchmarks",
     "greedy-degree-fill-in-heuristic",
     "benchmark-suites",
+    "dimacs-benchmarks",
     "grid-benchmark"
 ]
 resolver = "2"
